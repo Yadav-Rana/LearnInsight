@@ -21,7 +21,8 @@ backend/
 │   │   ├── index.js          # Environment config
 │   │   └── database.js       # MongoDB connection
 │   │
-│   ├── controllers/          # Route handlers (coming soon)
+│   ├── controllers/
+│   │   └── auth.controller.js # Auth route handlers
 │   │
 │   ├── middleware/
 │   │   ├── index.js          # Export all middleware
@@ -40,7 +41,11 @@ backend/
 │   │   └── Syllabus.js       # Syllabus for AI quiz gen
 │   │
 │   ├── routes/
-│   │   └── index.js          # API routes
+│   │   ├── index.js          # Main router
+│   │   └── auth.routes.js    # Auth routes
+│   │
+│   ├── validators/
+│   │   └── auth.validator.js # Auth input validation
 │   │
 │   ├── services/             # Business logic (coming soon)
 │   │
@@ -117,6 +122,18 @@ npm start
 - [x] **Insight** - weak areas, recommendations, AI summary
 - [x] **Syllabus** - content for AI quiz generation
 
+#### Validators
+- [x] Register validator
+- [x] Login validator
+- [x] Update profile validator
+- [x] Change password validator
+
+#### Controllers
+- [x] Auth controller (register, login, logout, getMe, updateProfile, changePassword)
+
+#### Routes
+- [x] Auth routes
+
 #### Utils
 - [x] JWT token generation (`generateToken`)
 - [x] Token response with cookie (`sendTokenResponse`)
@@ -132,16 +149,14 @@ npm start
 
 ### Pending
 
-#### Routes (Phase 1B)
-- [ ] Auth routes (register, login, logout, me)
+#### Routes (Phase 2)
 - [ ] User routes
 - [ ] Subject routes
 - [ ] Quiz routes
 - [ ] Progress routes
 - [ ] Insight routes
 
-#### Controllers (Phase 1B)
-- [ ] Auth controller
+#### Controllers (Phase 2)
 - [ ] User controller
 - [ ] Subject controller
 - [ ] Quiz controller
@@ -156,21 +171,44 @@ npm start
 
 ## API Endpoints
 
-### Available Now
+### Health Check
 
 ```
 GET  /                    # API info
 GET  /api/v1/health       # Health check
 ```
 
-### Coming Soon (Phase 1B)
+### Auth
 
 ```
-POST /api/v1/auth/register       # Register user
-POST /api/v1/auth/login          # Login
-POST /api/v1/auth/logout         # Logout
-GET  /api/v1/auth/me             # Get current user
-PUT  /api/v1/auth/update-profile # Update profile
+POST /api/v1/auth/register        # Register new user
+POST /api/v1/auth/login           # Login & get token
+POST /api/v1/auth/logout          # Logout (protected)
+GET  /api/v1/auth/me              # Get current user (protected)
+PUT  /api/v1/auth/update-profile  # Update profile (protected)
+PUT  /api/v1/auth/change-password # Change password (protected)
+```
+
+## API Usage Examples
+
+### Register
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John Doe","email":"john@example.com","password":"123456","role":"student"}'
+```
+
+### Login
+```bash
+curl -X POST http://localhost:5000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"john@example.com","password":"123456"}'
+```
+
+### Get Current User (with token)
+```bash
+curl http://localhost:5000/api/v1/auth/me \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
 ## Models Reference

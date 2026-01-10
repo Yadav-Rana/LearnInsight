@@ -36,6 +36,7 @@ LearnInsight/
 │   │   ├── middleware/       # Auth, error handling, validation
 │   │   ├── models/           # Mongoose schemas
 │   │   ├── routes/           # API routes
+│   │   ├── validators/       # Input validation
 │   │   ├── services/         # Business logic
 │   │   ├── utils/            # Helper functions
 │   │   ├── app.js            # Express app setup
@@ -116,13 +117,14 @@ npm run dev:backend     # Backend on http://localhost:5000
 - [x] **Insight** - Weak areas, strengths, AI recommendations
 - [x] **Syllabus** - Upload content for AI quiz generation
 
-#### Phase 1B: Auth Routes - PENDING
+#### Phase 1B: Auth Routes - COMPLETED
 
-- [ ] POST `/api/v1/auth/register`
-- [ ] POST `/api/v1/auth/login`
-- [ ] POST `/api/v1/auth/logout`
-- [ ] GET `/api/v1/auth/me`
-- [ ] PUT `/api/v1/auth/update-profile`
+- [x] POST `/api/v1/auth/register` - Register new user
+- [x] POST `/api/v1/auth/login` - Login & get JWT token
+- [x] POST `/api/v1/auth/logout` - Logout & clear cookie
+- [x] GET `/api/v1/auth/me` - Get current user profile
+- [x] PUT `/api/v1/auth/update-profile` - Update profile
+- [x] PUT `/api/v1/auth/change-password` - Change password
 
 #### Phase 1C: Frontend Auth - PENDING
 
@@ -233,13 +235,14 @@ npm run dev:backend     # Backend on http://localhost:5000
 GET /api/v1/health
 ```
 
-### Auth (Phase 1B - Coming Soon)
+### Auth
 ```
-POST /api/v1/auth/register
-POST /api/v1/auth/login
-POST /api/v1/auth/logout
-GET  /api/v1/auth/me
-PUT  /api/v1/auth/update-profile
+POST /api/v1/auth/register        # Register new user
+POST /api/v1/auth/login           # Login
+POST /api/v1/auth/logout          # Logout (protected)
+GET  /api/v1/auth/me              # Get current user (protected)
+PUT  /api/v1/auth/update-profile  # Update profile (protected)
+PUT  /api/v1/auth/change-password # Change password (protected)
 ```
 
 ## Scripts
