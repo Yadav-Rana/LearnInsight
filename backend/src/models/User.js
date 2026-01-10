@@ -25,11 +25,21 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Password must be at least 6 characters"],
       select: false,
     },
+    avatar: {
+      type: String,
+      default: null,
+    },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user",
+      enum: ["student", "teacher", "admin"],
+      default: "student",
     },
+    enrolledSubjects: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
+      },
+    ],
     isActive: {
       type: Boolean,
       default: true,
