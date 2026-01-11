@@ -54,8 +54,13 @@ const hkGrotesk = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "LearnInsight",
+  title: "LearnInsight - AI Companion",
   description: "LearnInsight - AI-Powered Learning Progress & Insight Platform",
+  icons: {
+    icon: "/learnInsight.svg",
+    shortcut: "/learnInsight.svg",
+    apple: "/learnInsight.svg",
+  },
 };
 
 export default function RootLayout({

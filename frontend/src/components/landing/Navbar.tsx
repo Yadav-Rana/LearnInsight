@@ -14,8 +14,8 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLogoHovered, setIsLogoHovered] = useState(false);
-  const [fillProgress, setFillProgress] = useState(100);
-  const [clipPath, setClipPath] = useState("inset(100% 0 0 0)");
+  const [drainProgress, setDrainProgress] = useState(0); // 0 = filled, 100 = drained
+  const [clipPath, setClipPath] = useState("inset(0% 0 0 0)");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,19 +25,21 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Wave fill animation for logo
+  // Wave drain animation for logo (opposite - drains on hover)
   useEffect(() => {
     let animationFrame: number;
     const speed = 1.5;
 
     const animate = () => {
-      setFillProgress((prev) => {
+      setDrainProgress((prev) => {
         if (isLogoHovered) {
-          const next = prev - speed;
-          return next <= 0 ? 0 : next;
-        } else {
+          // Drain on hover (increase progress)
           const next = prev + speed;
           return next >= 100 ? 100 : next;
+        } else {
+          // Fill back when not hovered (decrease progress)
+          const next = prev - speed;
+          return next <= 0 ? 0 : next;
         }
       });
       animationFrame = requestAnimationFrame(animate);
@@ -47,13 +49,13 @@ export default function Navbar() {
     return () => cancelAnimationFrame(animationFrame);
   }, [isLogoHovered]);
 
-  // Generate wave clip path
+  // Generate wave clip path for drain effect
   useEffect(() => {
     let animationFrame: number;
 
     const updateClipPath = () => {
-      if (fillProgress < 100) {
-        const baseY = fillProgress;
+      if (drainProgress < 100) {
+        const baseY = drainProgress;
         const waveHeight = 4;
         const time = Date.now() / 400;
         const points = [];
@@ -62,16 +64,17 @@ export default function Navbar() {
           const y = baseY + wave;
           points.push(`${x}% ${y}%`);
         }
+        // Clip from top - showing from baseY down to 100%
         setClipPath(`polygon(${points.join(", ")}, 100% 100%, 0% 100%)`);
       } else {
-        setClipPath("inset(100% 0 0 0)");
+        setClipPath("inset(100% 0 0 0)"); // Fully drained - hide all
       }
       animationFrame = requestAnimationFrame(updateClipPath);
     };
 
     animationFrame = requestAnimationFrame(updateClipPath);
     return () => cancelAnimationFrame(animationFrame);
-  }, [fillProgress]);
+  }, [drainProgress]);
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
@@ -105,14 +108,14 @@ export default function Navbar() {
           className="flex items-center px-4 py-2.5 rounded-xl transition-all duration-300"
           style={getBarStyle()}
         >
-          {/* Logo - Outlined text with wave fill */}
+          {/* Logo - Filled text with wave drain on hover */}
           <Link
             href="/"
             onMouseEnter={() => setIsLogoHovered(true)}
             onMouseLeave={() => setIsLogoHovered(false)}
             className="relative cursor-pointer"
           >
-            {/* Outline text - gradient stroke */}
+            {/* Outline text - shows when drained */}
             <span
               className="text-base sm:text-lg relative"
               style={{
