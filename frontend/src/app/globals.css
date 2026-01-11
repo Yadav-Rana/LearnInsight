@@ -288,64 +288,67 @@ body {
   background-clip: text;
 }
 
-/* Shimmer text animation */
-@keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
+/* ========================================
+   HERO SECTION RESPONSIVE STYLES
+   ======================================== */
+
+/* Main hero text - responsive sizing */
+.hero-text {
+  font-size: clamp(2.5rem, 12vw, 10rem);
 }
 
-.text-shimmer {
-  background: linear-gradient(
-    90deg,
-    #F97316 0%,
-    #FB923C 25%,
-    #FDBA74 50%,
-    #FB923C 75%,
-    #F97316 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: shimmer 3s linear infinite;
-}
-
-/* Shimmer outline effect - transparent fill with animated stroke */
-.text-shimmer-outline {
+/* Secondary hero text - responsive sizing */
+.hero-text-secondary {
+  font-size: clamp(1.5rem, 6vw, 5rem);
   color: transparent;
-  -webkit-text-stroke: 1.5px;
-  background: linear-gradient(
-    90deg,
-    #F97316 0%,
-    #FB923C 25%,
-    #FDBA74 50%,
-    #FB923C 75%,
-    #F97316 100%
-  );
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-stroke-color: transparent;
-  animation: shimmer 3s linear infinite;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.25);
 }
 
-/* Fallback for browsers without -webkit-text-stroke-color support */
-@supports not (-webkit-text-stroke-color: transparent) {
-  .text-shimmer-outline {
-    -webkit-text-stroke: 1.5px rgba(249, 115, 22, 0.6);
-    background: none;
-    animation: shimmer-stroke 3s linear infinite;
-  }
+/* Stroke styles with responsive stroke width */
+.hero-stroke-white {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.4);
+}
 
-  @keyframes shimmer-stroke {
-    0% { -webkit-text-stroke-color: #F97316; }
-    25% { -webkit-text-stroke-color: #FB923C; }
-    50% { -webkit-text-stroke-color: #FDBA74; }
-    75% { -webkit-text-stroke-color: #FB923C; }
-    100% { -webkit-text-stroke-color: #F97316; }
+.hero-stroke-orange {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(249, 115, 22, 0.5);
+}
+
+/* Tablet and up */
+@media (min-width: 640px) {
+  .hero-stroke-white {
+    -webkit-text-stroke-width: 1.5px;
+  }
+  .hero-stroke-orange {
+    -webkit-text-stroke-width: 1.5px;
+  }
+  .hero-text-secondary {
+    -webkit-text-stroke-width: 1.5px;
   }
 }
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .hero-stroke-white {
+    -webkit-text-stroke-width: 2px;
+  }
+  .hero-stroke-orange {
+    -webkit-text-stroke-width: 2px;
+  }
+  .hero-text-secondary {
+    -webkit-text-stroke-width: 1.5px;
+  }
+}
+
+/* Large desktop */
+@media (min-width: 1280px) {
+  .hero-text {
+    font-size: 10rem;
+  }
+  .hero-text-secondary {
+    font-size: 5rem;
+  }
+}
+
+

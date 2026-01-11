@@ -15,26 +15,48 @@ export default function Preloader({
   const [progress, setProgress] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [wavePoints, setWavePoints] = useState("");
 
   useEffect(() => {
     const startTime = Date.now();
-    const interval = setInterval(() => {
+    let animationFrame: number;
+
+    const animate = () => {
       const elapsed = Date.now() - startTime;
       const newProgress = Math.min((elapsed / duration) * 100, 100);
       setProgress(newProgress);
 
+      // Generate wave points for SVG polygon
+      const svgHeight = 120;
+      const svgWidth = 900;
+      const baseY = svgHeight - (newProgress / 100) * svgHeight;
+      const waveHeight = 4;
+      const time = Date.now() / 400;
+
+      const points = [];
+      for (let x = 0; x <= svgWidth; x += 20) {
+        const wave = Math.sin((x / 50) + time) * waveHeight;
+        const y = baseY + wave;
+        points.push(`${x},${y}`);
+      }
+      // Close the polygon at the bottom
+      points.push(`${svgWidth},${svgHeight}`);
+      points.push(`0,${svgHeight}`);
+      setWavePoints(points.join(" "));
+
       if (newProgress >= 100) {
-        clearInterval(interval);
         setIsComplete(true);
-        // Wait for exit animation before hiding
         setTimeout(() => {
           setIsVisible(false);
           onComplete?.();
         }, 1200);
+      } else {
+        animationFrame = requestAnimationFrame(animate);
       }
-    }, 16);
+    };
 
-    return () => clearInterval(interval);
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
   }, [duration, onComplete]);
 
   return (
@@ -64,12 +86,12 @@ export default function Preloader({
               times: [0, 0.7, 1],
             }}
           >
-            {/* SVG Text with gradient fill - clean clipping */}
+            {/* SVG Text with gradient fill - wave clipping */}
             <svg
               className="w-auto h-auto"
-              viewBox="0 0 600 80"
+              viewBox="0 0 900 120"
               style={{
-                width: "min(90vw, 800px)",
+                width: "min(95vw, 1100px)",
                 height: "auto",
               }}
             >
@@ -81,46 +103,41 @@ export default function Preloader({
                   <stop offset="100%" stopColor="#F97316" />
                 </linearGradient>
 
-                {/* Clip path for water level */}
-                <clipPath id="waterClip">
-                  <rect
-                    x="0"
-                    y={80 - (progress * 0.8)}
-                    width="600"
-                    height="80"
-                  />
+                {/* Wave clip path */}
+                <clipPath id="waveClip">
+                  <polygon points={wavePoints} />
                 </clipPath>
               </defs>
 
               {/* Outline text (always visible) */}
               <text
-                x="300"
-                y="58"
+                x="450"
+                y="85"
                 textAnchor="middle"
                 style={{
                   fontFamily: "var(--font-hk-grotesk), 'HK Grotesk', sans-serif",
-                  fontSize: "64px",
-                  fontWeight: 600,
-                  letterSpacing: "-0.02em",
+                  fontSize: "90px",
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
                   fill: "none",
-                  stroke: "rgba(249, 115, 22, 0.25)",
-                  strokeWidth: "1",
+                  stroke: "rgba(249, 115, 22, 0.3)",
+                  strokeWidth: "1.5",
                 }}
               >
                 LearnInsight
               </text>
 
-              {/* Filled text (clipped by water level) */}
+              {/* Filled text (clipped by wave) */}
               <text
-                x="300"
-                y="58"
+                x="450"
+                y="85"
                 textAnchor="middle"
-                clipPath="url(#waterClip)"
+                clipPath="url(#waveClip)"
                 style={{
                   fontFamily: "var(--font-hk-grotesk), 'HK Grotesk', sans-serif",
-                  fontSize: "64px",
-                  fontWeight: 600,
-                  letterSpacing: "-0.02em",
+                  fontSize: "90px",
+                  fontWeight: 800,
+                  letterSpacing: "0.06em",
                   fill: "url(#waterGradient)",
                 }}
               >
