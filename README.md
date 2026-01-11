@@ -12,11 +12,11 @@ LearnInsight is a full-featured learning analytics system where students can tra
 |-------|------------|
 | Frontend | Next.js 16, TypeScript, TailwindCSS 4 |
 | Animations | Framer Motion, Lottie, Lenis |
-| State | Redux Toolkit (planned) |
+| State | Redux Toolkit (Phase 1C) |
 | Backend | Express 5, Node.js |
 | Database | MongoDB + Mongoose |
 | Auth | JWT + HTTP-only cookies |
-| AI | Gemini API (planned) |
+| AI | Gemini API (Phase 3) |
 
 ## Project Structure
 
@@ -29,21 +29,19 @@ LearnInsight/
 │   │   └── providers/        # Context providers
 │   └── package.json
 │
-├── backend/                  # Express API
+├── backend/                  # Express API (COMPLETE)
 │   ├── src/
-│   │   ├── config/           # Configuration & DB connection
-│   │   ├── controllers/      # Route handlers
-│   │   ├── middleware/       # Auth, error handling, validation
-│   │   ├── models/           # Mongoose schemas
-│   │   ├── routes/           # API routes
+│   │   ├── config/           # Configuration & DB
+│   │   ├── controllers/      # 8 controllers
+│   │   ├── middleware/       # Auth, error, validation
+│   │   ├── models/           # 7 Mongoose models
+│   │   ├── routes/           # 8 route files
 │   │   ├── validators/       # Input validation
-│   │   ├── services/         # Business logic
-│   │   ├── utils/            # Helper functions
-│   │   ├── app.js            # Express app setup
-│   │   └── server.js         # Entry point
+│   │   ├── services/         # AI services (Phase 3)
+│   │   └── utils/            # Helpers
 │   └── package.json
 │
-├── .husky/                   # Git hooks (pre-commit build check)
+├── .husky/                   # Git hooks
 ├── package.json              # Root scripts
 └── README.md
 ```
@@ -53,35 +51,26 @@ LearnInsight/
 ### Prerequisites
 
 - Node.js 18+
-- MongoDB Atlas account (or local MongoDB)
+- MongoDB Atlas account
 
 ### Installation
 
 ```bash
-# Clone the repository
 git clone <repo-url>
 cd LearnInsight
 
-# Install root dependencies
-npm install
-
-# Install frontend dependencies
-cd frontend && npm install
-
-# Install backend dependencies
-cd ../backend && npm install
+npm install                    # Root dependencies
+cd frontend && npm install     # Frontend dependencies
+cd ../backend && npm install   # Backend dependencies
 ```
 
 ### Environment Setup
-
-Create `backend/.env` from the example:
 
 ```bash
 cp backend/.env.example backend/.env
 ```
 
-Update the `.env` file with your values:
-
+Update `backend/.env`:
 ```env
 NODE_ENV=development
 PORT=5000
@@ -92,15 +81,12 @@ COOKIE_EXPIRE=7
 FRONTEND_URL=http://localhost:3000
 ```
 
-### Running the Project
+### Running
 
 ```bash
-# From root directory - run both frontend and backend
-npm run dev
-
-# Or run separately:
-npm run dev:frontend    # Frontend on http://localhost:3000
-npm run dev:backend     # Backend on http://localhost:5000
+npm run dev              # Both frontend + backend
+npm run dev:frontend     # Frontend only (port 3000)
+npm run dev:backend      # Backend only (port 5000)
 ```
 
 ## Progress Tracker
@@ -108,152 +94,98 @@ npm run dev:backend     # Backend on http://localhost:5000
 ### Phase 1: Foundation
 
 #### Phase 1A: Backend Models - COMPLETED
-
-- [x] **User** - Roles (student/teacher/admin), enrolled subjects, password hashing
-- [x] **Subject** - Flexible hierarchy (parent-child), embedded resources
-- [x] **Quiz** - Questions with options, points, AI-generated flag, time limit
-- [x] **QuizAttempt** - Answer tracking, score calculation, time taken
-- [x] **Progress** - Per-user per-subject tracking, quiz stats
-- [x] **Insight** - Weak areas, strengths, AI recommendations
-- [x] **Syllabus** - Upload content for AI quiz generation
+- [x] User, Subject, Quiz, QuizAttempt, Progress, Insight, Syllabus
 
 #### Phase 1B: Auth Routes - COMPLETED
-
-- [x] POST `/api/v1/auth/register` - Register new user
-- [x] POST `/api/v1/auth/login` - Login & get JWT token
-- [x] POST `/api/v1/auth/logout` - Logout & clear cookie
-- [x] GET `/api/v1/auth/me` - Get current user profile
-- [x] PUT `/api/v1/auth/update-profile` - Update profile
-- [x] PUT `/api/v1/auth/change-password` - Change password
+- [x] Register, Login, Logout, Me, Update Profile, Change Password
 
 #### Phase 1C: Frontend Auth - PENDING
-
 - [ ] Redux store setup
-- [ ] Login page
-- [ ] Register page
+- [ ] Login/Register pages
 - [ ] Protected routes
 
-### Phase 2: Core Modules - PENDING
+### Phase 2: Core Backend - COMPLETED
 
-- [ ] Subject CRUD
-- [ ] Quiz CRUD
-- [ ] Student enrollment
-- [ ] Quiz taking flow
-- [ ] Progress tracking
+#### Users
+- [x] Get all users (admin)
+- [x] Get/Update/Delete user
+- [x] Enroll/Unenroll in subjects
 
-### Phase 3: AI Layer - PENDING
+#### Subjects
+- [x] CRUD operations
+- [x] Hierarchical structure (parent-child)
+- [x] Resource management (YouTube, articles, PDFs)
 
+#### Quizzes
+- [x] CRUD operations
+- [x] Publish/Unpublish
+- [x] Duplicate quiz
+
+#### Quiz Attempts
+- [x] Submit attempts with auto-scoring
+- [x] Get stats and history
+- [x] Leaderboard
+
+#### Progress
+- [x] Track per subject
+- [x] Quiz stats aggregation
+- [x] Resource view tracking
+- [x] Student progress view (teacher/admin)
+
+#### Insights
+- [x] Generate insights (weak areas, strengths)
+- [x] Recommendations system
+- [x] AI summary (placeholder)
+
+#### Syllabus
+- [x] Upload syllabus content
+- [x] Generate quiz from syllabus (placeholder for AI)
+- [x] Extract topics (placeholder for AI)
+
+### Phase 3: AI Integration - PENDING
 - [ ] Gemini API integration
-- [ ] Syllabus upload + quiz generation
-- [ ] Weakness detection
-- [ ] Insight generation
+- [ ] AI quiz generation
+- [ ] AI topic extraction
 - [ ] YouTube API search
+- [ ] Smart recommendations
 
-### Phase 4: Dashboard & Analytics - PENDING
-
+### Phase 4: Frontend Development - PENDING
 - [ ] Student dashboard
 - [ ] Teacher dashboard
 - [ ] Admin panel
 - [ ] Charts (Recharts)
 
 ### Phase 5: Polish & Deploy - PENDING
-
 - [ ] UI polish
-- [ ] Error handling
 - [ ] CI/CD
 - [ ] Deployment
 
-## Database Models
+## API Endpoints Summary
 
-### User
-```javascript
-{
-  name, email, password, avatar,
-  role: "student" | "teacher" | "admin",
-  enrolledSubjects: [ObjectId],
-  isActive: Boolean
-}
-```
+| Resource | Endpoints | Auth |
+|----------|-----------|------|
+| Auth | 6 | Public/Private |
+| Users | 7 | Admin/Teacher |
+| Subjects | 8 | Private |
+| Quizzes | 8 | Private |
+| Attempts | 6 | Private |
+| Progress | 7 | Private |
+| Insights | 5 | Private |
+| Syllabus | 7 | Private |
 
-### Subject (Flexible Hierarchy)
-```javascript
-{
-  name, description, icon,
-  parent: ObjectId | null,
-  level: Number,
-  createdBy: ObjectId,
-  resources: [{ title, url, type }]
-}
-```
+**Total: 54 API endpoints**
 
-### Quiz
-```javascript
-{
-  title, description, subject,
-  questions: [{ question, options, correctAnswer, explanation, points }],
-  createdBy, isAIGenerated, difficulty, timeLimit, passingScore
-}
-```
-
-### QuizAttempt
-```javascript
-{
-  user, quiz,
-  answers: [{ questionId, selectedAnswer, isCorrect, pointsEarned }],
-  score, totalPoints, percentage, passed, timeTaken
-}
-```
-
-### Progress
-```javascript
-{
-  user, subject, completionRate, totalTimeSpent,
-  lastActivity, quizAttempts, quizStats, viewedResources
-}
-```
-
-### Insight
-```javascript
-{
-  user, weakAreas, strengths, recommendations,
-  aiSummary, overallStats, generatedAt
-}
-```
-
-### Syllabus
-```javascript
-{
-  user, subject, title, content, fileName,
-  generatedQuizzes, extractedTopics, status
-}
-```
-
-## API Endpoints
-
-### Health Check
-```
-GET /api/v1/health
-```
-
-### Auth
-```
-POST /api/v1/auth/register        # Register new user
-POST /api/v1/auth/login           # Login
-POST /api/v1/auth/logout          # Logout (protected)
-GET  /api/v1/auth/me              # Get current user (protected)
-PUT  /api/v1/auth/update-profile  # Update profile (protected)
-PUT  /api/v1/auth/change-password # Change password (protected)
-```
+See `backend/README.md` for complete API documentation.
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Run frontend + backend concurrently |
-| `npm run dev:frontend` | Run frontend only |
-| `npm run dev:backend` | Run backend only |
-| `npm run build` | Build frontend for production |
-| `npm run lint` | Run ESLint on frontend |
+| `npm run dev` | Run frontend + backend |
+| `npm run dev:frontend` | Frontend only |
+| `npm run dev:backend` | Backend only |
+| `npm run build` | Build frontend |
+| `npm run lint` | Run ESLint |
 
 ## License
 

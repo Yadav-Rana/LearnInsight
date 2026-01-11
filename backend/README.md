@@ -18,45 +18,66 @@ Express.js API server for the LearnInsight platform.
 backend/
 ├── src/
 │   ├── config/
-│   │   ├── index.js          # Environment config
-│   │   └── database.js       # MongoDB connection
+│   │   ├── index.js              # Environment config
+│   │   └── database.js           # MongoDB connection
 │   │
 │   ├── controllers/
-│   │   └── auth.controller.js # Auth route handlers
+│   │   ├── auth.controller.js    # Auth handlers
+│   │   ├── user.controller.js    # User management
+│   │   ├── subject.controller.js # Subject CRUD
+│   │   ├── quiz.controller.js    # Quiz CRUD
+│   │   ├── quizAttempt.controller.js # Quiz attempts
+│   │   ├── progress.controller.js    # Progress tracking
+│   │   ├── insight.controller.js     # AI insights
+│   │   └── syllabus.controller.js    # Syllabus & AI quiz gen
 │   │
 │   ├── middleware/
-│   │   ├── index.js          # Export all middleware
-│   │   ├── auth.js           # JWT protect & authorize
-│   │   ├── errorHandler.js   # AppError class & error handler
-│   │   └── validate.js       # Input validation wrapper
+│   │   ├── index.js              # Export all middleware
+│   │   ├── auth.js               # JWT protect & authorize
+│   │   ├── errorHandler.js       # AppError & error handler
+│   │   └── validate.js           # Input validation wrapper
 │   │
 │   ├── models/
-│   │   ├── index.js          # Export all models
-│   │   ├── User.js           # User schema
-│   │   ├── Subject.js        # Subject with hierarchy
-│   │   ├── Quiz.js           # Quiz with questions
-│   │   ├── QuizAttempt.js    # Quiz attempt tracking
-│   │   ├── Progress.js       # Learning progress
-│   │   ├── Insight.js        # AI-generated insights
-│   │   └── Syllabus.js       # Syllabus for AI quiz gen
+│   │   ├── index.js              # Export all models
+│   │   ├── User.js
+│   │   ├── Subject.js
+│   │   ├── Quiz.js
+│   │   ├── QuizAttempt.js
+│   │   ├── Progress.js
+│   │   ├── Insight.js
+│   │   └── Syllabus.js
 │   │
 │   ├── routes/
-│   │   ├── index.js          # Main router
-│   │   └── auth.routes.js    # Auth routes
+│   │   ├── index.js              # Main router
+│   │   ├── auth.routes.js
+│   │   ├── user.routes.js
+│   │   ├── subject.routes.js
+│   │   ├── quiz.routes.js
+│   │   ├── quizAttempt.routes.js
+│   │   ├── progress.routes.js
+│   │   ├── insight.routes.js
+│   │   └── syllabus.routes.js
 │   │
 │   ├── validators/
-│   │   └── auth.validator.js # Auth input validation
+│   │   ├── auth.validator.js
+│   │   ├── user.validator.js
+│   │   ├── subject.validator.js
+│   │   ├── quiz.validator.js
+│   │   ├── quizAttempt.validator.js
+│   │   ├── progress.validator.js
+│   │   ├── insight.validator.js
+│   │   └── syllabus.validator.js
 │   │
-│   ├── services/             # Business logic (coming soon)
+│   ├── services/                 # Business logic (AI - Phase 3)
 │   │
 │   ├── utils/
-│   │   ├── apiResponse.js    # Standardized API responses
-│   │   └── generateToken.js  # JWT token utilities
+│   │   ├── apiResponse.js
+│   │   └── generateToken.js
 │   │
-│   ├── app.js                # Express app configuration
-│   └── server.js             # Server entry point
+│   ├── app.js
+│   └── server.js
 │
-├── .env.example              # Environment template
+├── .env.example
 ├── .gitignore
 └── package.json
 ```
@@ -70,13 +91,9 @@ npm install
 
 ## Environment Variables
 
-Create `.env` from template:
-
 ```bash
 cp .env.example .env
 ```
-
-Required variables:
 
 | Variable | Description | Example |
 |----------|-------------|---------|
@@ -91,294 +108,128 @@ Required variables:
 ## Running
 
 ```bash
-# Development (with nodemon)
-npm run dev
+npm run dev    # Development (nodemon)
+npm start      # Production
+```
 
-# Production
-npm start
+## API Endpoints
+
+### Health Check
+```
+GET  /api/v1/health
+```
+
+### Auth
+```
+POST /api/v1/auth/register           # Register new user
+POST /api/v1/auth/login              # Login
+POST /api/v1/auth/logout             # Logout (protected)
+GET  /api/v1/auth/me                 # Get current user (protected)
+PUT  /api/v1/auth/update-profile     # Update profile (protected)
+PUT  /api/v1/auth/change-password    # Change password (protected)
+```
+
+### Users (Admin/Teacher)
+```
+GET    /api/v1/users                 # Get all users (admin)
+GET    /api/v1/users/role/:role      # Get users by role (admin)
+GET    /api/v1/users/:id             # Get single user
+PUT    /api/v1/users/:id             # Update user (admin)
+DELETE /api/v1/users/:id             # Delete user (admin)
+POST   /api/v1/users/:id/enroll      # Enroll user in subject
+DELETE /api/v1/users/:id/enroll/:subjectId  # Unenroll user
+```
+
+### Subjects
+```
+GET    /api/v1/subjects              # Get all subjects (?tree=true for hierarchy)
+GET    /api/v1/subjects/:id          # Get single subject
+POST   /api/v1/subjects              # Create subject (admin/teacher)
+PUT    /api/v1/subjects/:id          # Update subject (admin/teacher)
+DELETE /api/v1/subjects/:id          # Delete subject (admin)
+GET    /api/v1/subjects/:id/hierarchy # Get breadcrumb hierarchy
+POST   /api/v1/subjects/:id/resources # Add resource (admin/teacher)
+DELETE /api/v1/subjects/:id/resources/:resourceId # Remove resource
+```
+
+### Quizzes
+```
+GET    /api/v1/quizzes               # Get all quizzes
+GET    /api/v1/quizzes/:id           # Get single quiz
+POST   /api/v1/quizzes               # Create quiz (admin/teacher)
+PUT    /api/v1/quizzes/:id           # Update quiz (admin/teacher)
+DELETE /api/v1/quizzes/:id           # Delete quiz (admin/teacher)
+PUT    /api/v1/quizzes/:id/publish   # Toggle publish (admin/teacher)
+POST   /api/v1/quizzes/:id/duplicate # Duplicate quiz (admin/teacher)
+GET    /api/v1/quizzes/subject/:subjectId # Get quizzes by subject
+```
+
+### Quiz Attempts
+```
+POST   /api/v1/attempts              # Submit quiz attempt
+GET    /api/v1/attempts              # Get my attempts
+GET    /api/v1/attempts/stats        # Get my stats
+GET    /api/v1/attempts/:id          # Get single attempt
+GET    /api/v1/attempts/quiz/:quizId # Get attempts by quiz (admin/teacher)
+GET    /api/v1/attempts/quiz/:quizId/best # Get my best attempt for quiz
+```
+
+### Progress
+```
+GET    /api/v1/progress              # Get my progress (all subjects)
+GET    /api/v1/progress/subject/:subjectId # Get progress for subject
+PUT    /api/v1/progress/subject/:subjectId # Update progress
+POST   /api/v1/progress/subject/:subjectId/resource # Mark resource viewed
+GET    /api/v1/progress/subject/:subjectId/leaderboard # Get leaderboard
+GET    /api/v1/progress/subject/:subjectId/students # Get all students (admin/teacher)
+GET    /api/v1/progress/user/:userId # Get student progress (admin/teacher)
+```
+
+### Insights
+```
+POST   /api/v1/insights/generate     # Generate new insights
+GET    /api/v1/insights              # Get my insights history
+GET    /api/v1/insights/latest       # Get latest insight
+GET    /api/v1/insights/:id          # Get single insight
+GET    /api/v1/insights/user/:userId # Get student insights (admin/teacher)
+```
+
+### Syllabus
+```
+GET    /api/v1/syllabus              # Get my syllabuses
+POST   /api/v1/syllabus              # Upload syllabus
+GET    /api/v1/syllabus/:id          # Get single syllabus
+PUT    /api/v1/syllabus/:id          # Update syllabus
+DELETE /api/v1/syllabus/:id          # Delete syllabus
+POST   /api/v1/syllabus/:id/generate-quiz   # Generate quiz from syllabus (AI)
+POST   /api/v1/syllabus/:id/extract-topics  # Extract topics (AI)
 ```
 
 ## Implementation Status
 
 ### Completed
-
-#### Config
-- [x] Environment configuration (`config/index.js`)
-- [x] MongoDB connection with error handling (`config/database.js`)
-
-#### Middleware
-- [x] JWT authentication (`protect`)
-- [x] Role-based authorization (`authorize`)
-- [x] Custom error handling (`AppError`, `errorHandler`)
-- [x] 404 handler (`notFound`)
-- [x] Input validation wrapper (`validate`)
-
-#### Models
-- [x] **User** - name, email, password (hashed), avatar, role, enrolledSubjects
-- [x] **Subject** - flexible hierarchy, resources, parent-child relationships
-- [x] **Quiz** - questions with options, points, difficulty, time limit
-- [x] **QuizAttempt** - answers, score, percentage, pass/fail
-- [x] **Progress** - completion rate, time spent, quiz stats
-- [x] **Insight** - weak areas, recommendations, AI summary
-- [x] **Syllabus** - content for AI quiz generation
-
-#### Validators
-- [x] Register validator
-- [x] Login validator
-- [x] Update profile validator
-- [x] Change password validator
-
-#### Controllers
-- [x] Auth controller (register, login, logout, getMe, updateProfile, changePassword)
-
-#### Routes
-- [x] Auth routes
-
-#### Utils
-- [x] JWT token generation (`generateToken`)
-- [x] Token response with cookie (`sendTokenResponse`)
-- [x] API response helpers (`ApiResponse`)
-
-#### App Setup
-- [x] Express app with security (Helmet, CORS)
-- [x] Body parser with limits
-- [x] Cookie parser
-- [x] Morgan logging (dev mode)
+- [x] All 7 database models
+- [x] Auth system (register, login, logout, JWT)
+- [x] User management (CRUD, enrollment)
+- [x] Subject management (CRUD, hierarchy, resources)
+- [x] Quiz management (CRUD, publish, duplicate)
+- [x] Quiz attempts (submit, stats, leaderboard)
+- [x] Progress tracking (per subject, resources viewed)
+- [x] Insights (generation, weak areas, recommendations)
+- [x] Syllabus (upload, AI quiz generation placeholder)
+- [x] Input validation for all routes
 - [x] Error handling middleware
-- [x] Graceful shutdown handlers
+- [x] Role-based authorization
 
-### Pending
-
-#### Routes (Phase 2)
-- [ ] User routes
-- [ ] Subject routes
-- [ ] Quiz routes
-- [ ] Progress routes
-- [ ] Insight routes
-
-#### Controllers (Phase 2)
-- [ ] User controller
-- [ ] Subject controller
-- [ ] Quiz controller
-- [ ] Progress controller
-- [ ] Insight controller
-
-#### Services (Phase 3)
-- [ ] AI service (Gemini integration)
-- [ ] Quiz generation service
-- [ ] Insight generation service
-- [ ] YouTube search service
-
-## API Endpoints
-
-### Health Check
-
-```
-GET  /                    # API info
-GET  /api/v1/health       # Health check
-```
-
-### Auth
-
-```
-POST /api/v1/auth/register        # Register new user
-POST /api/v1/auth/login           # Login & get token
-POST /api/v1/auth/logout          # Logout (protected)
-GET  /api/v1/auth/me              # Get current user (protected)
-PUT  /api/v1/auth/update-profile  # Update profile (protected)
-PUT  /api/v1/auth/change-password # Change password (protected)
-```
-
-## API Usage Examples
-
-### Register
-```bash
-curl -X POST http://localhost:5000/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","email":"john@example.com","password":"123456","role":"student"}'
-```
-
-### Login
-```bash
-curl -X POST http://localhost:5000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"john@example.com","password":"123456"}'
-```
-
-### Get Current User (with token)
-```bash
-curl http://localhost:5000/api/v1/auth/me \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-## Models Reference
-
-### User
-```javascript
-{
-  name: String,           // required, max 50 chars
-  email: String,          // required, unique, lowercase
-  password: String,       // required, min 6 chars, hashed
-  avatar: String,         // optional
-  role: String,           // "student" | "teacher" | "admin"
-  enrolledSubjects: [ObjectId],
-  isActive: Boolean
-}
-```
-
-### Subject
-```javascript
-{
-  name: String,           // required, max 100 chars
-  description: String,    // max 500 chars
-  icon: String,
-  parent: ObjectId,       // null = root subject
-  level: Number,          // 0 = root, 1 = chapter, etc.
-  order: Number,          // display order
-  createdBy: ObjectId,
-  resources: [{
-    title: String,
-    url: String,
-    type: "youtube" | "article" | "pdf" | "other",
-    description: String
-  }],
-  isActive: Boolean
-}
-```
-
-### Quiz
-```javascript
-{
-  title: String,
-  description: String,
-  subject: ObjectId,
-  questions: [{
-    question: String,
-    options: [String],      // 2-6 options
-    correctAnswer: Number,  // index
-    explanation: String,
-    points: Number
-  }],
-  createdBy: ObjectId,
-  isAIGenerated: Boolean,
-  difficulty: "easy" | "medium" | "hard",
-  timeLimit: Number,        // minutes, null = unlimited
-  passingScore: Number,     // percentage
-  isPublished: Boolean,
-  totalPoints: Number       // auto-calculated
-}
-```
-
-### QuizAttempt
-```javascript
-{
-  user: ObjectId,
-  quiz: ObjectId,
-  answers: [{
-    questionId: ObjectId,
-    selectedAnswer: Number,
-    isCorrect: Boolean,
-    pointsEarned: Number
-  }],
-  score: Number,
-  totalPoints: Number,
-  percentage: Number,
-  passed: Boolean,
-  timeTaken: Number,        // seconds
-  startedAt: Date,
-  completedAt: Date
-}
-```
-
-### Progress
-```javascript
-{
-  user: ObjectId,
-  subject: ObjectId,
-  completionRate: Number,   // 0-100
-  totalTimeSpent: Number,   // seconds
-  lastActivity: Date,
-  quizAttempts: [ObjectId],
-  quizStats: {
-    totalAttempts: Number,
-    averageScore: Number,
-    bestScore: Number,
-    passedCount: Number
-  },
-  viewedResources: [{ resourceId, viewedAt }],
-  notes: String
-}
-```
-
-### Insight
-```javascript
-{
-  user: ObjectId,
-  weakAreas: [{
-    subject: ObjectId,
-    reason: String,
-    severity: "low" | "medium" | "high",
-    averageScore: Number,
-    suggestedAction: String
-  }],
-  strengths: [{ subject, reason, averageScore }],
-  recommendations: [{
-    title: String,
-    url: String,
-    type: "youtube" | "article" | "pdf" | "course" | "other",
-    relevance: Number,      // 0-100
-    relatedSubject: ObjectId,
-    isAIGenerated: Boolean
-  }],
-  aiSummary: String,
-  overallStats: { ... },
-  generatedAt: Date,
-  isViewed: Boolean
-}
-```
-
-### Syllabus
-```javascript
-{
-  user: ObjectId,
-  subject: ObjectId,
-  title: String,
-  content: String,
-  fileName: String,
-  fileType: "pdf" | "text" | "docx" | "manual",
-  generatedQuizzes: [ObjectId],
-  extractedTopics: [{ topic, subtopics }],
-  status: "pending" | "processing" | "completed" | "failed",
-  processingError: String,
-  uploadedAt: Date
-}
-```
-
-## Error Handling
-
-All errors follow this format:
-
-```javascript
-// Development
-{
-  success: false,
-  status: "fail" | "error",
-  message: "Error message",
-  stack: "...",
-  error: { ... }
-}
-
-// Production
-{
-  success: false,
-  status: "fail" | "error",
-  message: "Error message"
-}
-```
+### Pending (Phase 3)
+- [ ] Gemini API integration for quiz generation
+- [ ] Gemini API integration for topic extraction
+- [ ] YouTube API for video recommendations
+- [ ] AI-powered insight generation
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start with nodemon (auto-reload) |
+| `npm run dev` | Start with nodemon |
 | `npm start` | Start production server |
