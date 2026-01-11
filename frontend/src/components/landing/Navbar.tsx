@@ -13,6 +13,9 @@ const navLinks = [
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLogoHovered, setIsLogoHovered] = useState(false);
+  const [fillProgress, setFillProgress] = useState(100);
+  const [clipPath, setClipPath] = useState("inset(100% 0 0 0)");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -22,6 +25,54 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Wave fill animation for logo
+  useEffect(() => {
+    let animationFrame: number;
+    const speed = 1.5;
+
+    const animate = () => {
+      setFillProgress((prev) => {
+        if (isLogoHovered) {
+          const next = prev - speed;
+          return next <= 0 ? 0 : next;
+        } else {
+          const next = prev + speed;
+          return next >= 100 ? 100 : next;
+        }
+      });
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isLogoHovered]);
+
+  // Generate wave clip path
+  useEffect(() => {
+    let animationFrame: number;
+
+    const updateClipPath = () => {
+      if (fillProgress < 100) {
+        const baseY = fillProgress;
+        const waveHeight = 4;
+        const time = Date.now() / 400;
+        const points = [];
+        for (let x = 0; x <= 100; x += 5) {
+          const wave = Math.sin((x / 8) + time) * waveHeight;
+          const y = baseY + wave;
+          points.push(`${x}% ${y}%`);
+        }
+        setClipPath(`polygon(${points.join(", ")}, 100% 100%, 0% 100%)`);
+      } else {
+        setClipPath("inset(100% 0 0 0)");
+      }
+      animationFrame = requestAnimationFrame(updateClipPath);
+    };
+
+    animationFrame = requestAnimationFrame(updateClipPath);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [fillProgress]);
+
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
   };
@@ -30,7 +81,7 @@ export default function Navbar() {
   const getBarStyle = () => {
     if (isScrolled) {
       return {
-        background: "rgba(17, 17, 17, 0.4)",
+        background: "rgba(20, 20, 20, 0.4)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
       };
@@ -54,17 +105,42 @@ export default function Navbar() {
           className="flex items-center px-4 py-2.5 rounded-xl transition-all duration-300"
           style={getBarStyle()}
         >
-          {/* Logo - Text only */}
-          <Link href="/">
+          {/* Logo - Outlined text with wave fill */}
+          <Link
+            href="/"
+            onMouseEnter={() => setIsLogoHovered(true)}
+            onMouseLeave={() => setIsLogoHovered(false)}
+            className="relative cursor-pointer"
+          >
+            {/* Outline text - gradient stroke */}
             <span
-              className="text-base sm:text-lg"
+              className="text-base sm:text-lg relative"
               style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 600,
-                color: "var(--text-primary)",
+                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                color: "transparent",
+                WebkitTextStroke: "1px",
+                WebkitTextStrokeColor: "rgba(249, 115, 22, 0.5)",
               }}
             >
-              LearnInsight
+              Learn
+              <span style={{ WebkitTextStrokeColor: "rgba(59, 130, 246, 0.5)" }}>
+                Insight
+              </span>
+            </span>
+            {/* Filled text with wave animation */}
+            <span
+              className="absolute inset-0 text-base sm:text-lg overflow-hidden"
+              style={{
+                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontWeight: 700,
+                letterSpacing: "0.02em",
+                clipPath,
+              }}
+            >
+              <span style={{ color: "#F97316" }}>Learn</span>
+              <span style={{ color: "#3B82F6" }}>Insight</span>
             </span>
           </Link>
 

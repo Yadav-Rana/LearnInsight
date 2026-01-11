@@ -81,10 +81,10 @@ img, video, svg {
    Darkest grey, not pure black
    ======================================== */
 :root, [data-theme="dark"] {
-  --bg-primary: #111111;
-  --bg-secondary: #161616;
-  --bg-card: #1a1a1a;
-  --bg-card-hover: #222222;
+  --bg-primary: #141414;
+  --bg-secondary: #141414;
+  --bg-card: #1c1c1c;
+  --bg-card-hover: #242424;
 
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
@@ -97,7 +97,7 @@ img, video, svg {
   --glass-border: rgba(255, 255, 255, 0.08);
 
   --grid-color: rgba(255, 255, 255, 0.03);
-  --vignette-color: #111111;
+  --vignette-color: #141414;
 
   --button-primary-bg: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   --button-primary-text: #ffffff;
