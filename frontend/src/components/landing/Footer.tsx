@@ -8,8 +8,8 @@ const footerLinks = {
     { label: "Benefits", href: "#benefits" },
   ],
   company: [
-    { label: "About", href: "#" },
-    { label: "Contact", href: "#" },
+    { label: "About", href: "/about" },
+    { label: "Contact", href: "/contact" },
   ],
 };
 
