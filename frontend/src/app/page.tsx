@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { Preloader } from "@/components/ui";
 import {
   Navbar,
   Hero,
@@ -15,6 +17,7 @@ import {
 export default function Home() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
+  const [preloaderComplete, setPreloaderComplete] = useState(false);
 
   useEffect(() => {
     // Redirect authenticated users to dashboard
@@ -23,18 +26,14 @@ export default function Home() {
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading) {
+  // Show preloader while auth is loading or preloader hasn't completed
+  if (isLoading || !preloaderComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
-        <div className="relative">
-          <div
-            className="w-12 h-12 rounded-full border-2 animate-spin"
-            style={{
-              borderColor: "var(--color-primary-light)",
-              borderTopColor: "var(--color-primary)",
-            }}
-          />
-        </div>
+      <div style={{ background: "var(--bg-primary)" }}>
+        <Preloader
+          duration={2500}
+          onComplete={() => setPreloaderComplete(true)}
+        />
       </div>
     );
   }
@@ -45,13 +44,19 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen" style={{ background: "var(--bg-primary)" }}>
+    <motion.main
+      className="min-h-screen"
+      style={{ background: "var(--bg-primary)" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
       <Navbar />
       <Hero />
       <FeaturesSection />
       <BenefitsSection />
       <CTASection />
       <Footer />
-    </main>
+    </motion.main>
   );
 }
