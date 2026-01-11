@@ -61,8 +61,8 @@ img, video, svg {
   --color-secondary-light: rgba(59, 130, 246, 0.15);
   --color-secondary-glow: rgba(59, 130, 246, 0.3);
 
-  /* Typography - Poppins for both display and body */
-  --font-display: var(--font-poppins), "Poppins", sans-serif;
+  /* Typography - HK Grotesk for display, Poppins for body */
+  --font-display: var(--font-hk-grotesk), "HK Grotesk", sans-serif;
   --font-body: var(--font-poppins), "Poppins", sans-serif;
 
   /* Spacing */
@@ -312,4 +312,40 @@ body {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: shimmer 3s linear infinite;
+}
+
+/* Shimmer outline effect - transparent fill with animated stroke */
+.text-shimmer-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px;
+  background: linear-gradient(
+    90deg,
+    #F97316 0%,
+    #FB923C 25%,
+    #FDBA74 50%,
+    #FB923C 75%,
+    #F97316 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Fallback for browsers without -webkit-text-stroke-color support */
+@supports not (-webkit-text-stroke-color: transparent) {
+  .text-shimmer-outline {
+    -webkit-text-stroke: 1.5px rgba(249, 115, 22, 0.6);
+    background: none;
+    animation: shimmer-stroke 3s linear infinite;
+  }
+
+  @keyframes shimmer-stroke {
+    0% { -webkit-text-stroke-color: #F97316; }
+    25% { -webkit-text-stroke-color: #FB923C; }
+    50% { -webkit-text-stroke-color: #FDBA74; }
+    75% { -webkit-text-stroke-color: #FB923C; }
+    100% { -webkit-text-stroke-color: #F97316; }
+  }
 }

@@ -98,10 +98,10 @@ export default function Preloader({
                 y="58"
                 textAnchor="middle"
                 style={{
-                  fontFamily: "var(--font-display)",
+                  fontFamily: "var(--font-hk-grotesk), 'HK Grotesk', sans-serif",
                   fontSize: "64px",
-                  fontWeight: 500,
-                  letterSpacing: "-0.03em",
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
                   fill: "none",
                   stroke: "rgba(249, 115, 22, 0.25)",
                   strokeWidth: "1",
@@ -117,10 +117,10 @@ export default function Preloader({
                 textAnchor="middle"
                 clipPath="url(#waterClip)"
                 style={{
-                  fontFamily: "var(--font-display)",
+                  fontFamily: "var(--font-hk-grotesk), 'HK Grotesk', sans-serif",
                   fontSize: "64px",
-                  fontWeight: 500,
-                  letterSpacing: "-0.03em",
+                  fontWeight: 600,
+                  letterSpacing: "-0.02em",
                   fill: "url(#waterGradient)",
                 }}
               >

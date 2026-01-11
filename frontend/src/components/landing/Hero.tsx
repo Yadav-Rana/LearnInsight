@@ -16,38 +16,54 @@ export default function Hero() {
       <Particles count={50} color="#F97316" />
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-6 sm:px-10 md:px-12 lg:px-16 relative z-10 text-center">
-        {/* Main Heading - Two Lines */}
+      <div className="max-w-7xl mx-auto px-6 sm:px-10 md:px-12 lg:px-16 relative z-10 text-center">
+        {/* Main Heading - Outline Style */}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
           className="mb-6"
         >
-          <span
-            className="block text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              lineHeight: "1",
-              letterSpacing: "-0.03em",
-              color: "var(--text-primary)",
-            }}
-          >
-            Learn{" "}
-            <span className="text-shimmer">Smarter</span>
+          {/* First Line - "Learn Smarter" */}
+          <span className="block text-6xl sm:text-7xl md:text-8xl lg:text-9xl xl:text-[10rem]">
+            <span
+              style={{
+                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontWeight: 600,
+                lineHeight: "1",
+                letterSpacing: "-0.02em",
+                color: "transparent",
+                WebkitTextStroke: "1.5px rgba(255, 255, 255, 0.4)",
+              }}
+            >
+              Learn{" "}
+            </span>
+            <span
+              className="text-shimmer-outline"
+              style={{
+                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontWeight: 600,
+                lineHeight: "1",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Smarter
+            </span>
           </span>
+
+          {/* Second Line - "Achieve More" */}
           <motion.span
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
-            className="block text-3xl sm:text-4xl md:text-5xl lg:text-6xl mt-2 sm:mt-4"
+            className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl mt-2 sm:mt-4"
             style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
+              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontWeight: 400,
               lineHeight: "1.1",
               letterSpacing: "-0.02em",
-              color: "var(--text-secondary)",
+              color: "transparent",
+              WebkitTextStroke: "1px rgba(255, 255, 255, 0.25)",
             }}
           >
             Achieve More
