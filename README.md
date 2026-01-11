@@ -25,8 +25,15 @@ LearnInsight/
 ├── frontend/                 # Next.js 16 App
 │   ├── src/
 │   │   ├── app/              # App router pages
+│   │   │   ├── (auth)/       # Auth pages (login, register)
+│   │   │   └── (dashboard)/  # Protected dashboard pages
 │   │   ├── components/       # React components
-│   │   └── providers/        # Context providers
+│   │   │   └── auth/         # Auth components
+│   │   ├── hooks/            # Custom hooks (useAuth)
+│   │   ├── lib/              # API client, validations
+│   │   ├── providers/        # Redux, Lenis providers
+│   │   ├── store/            # Redux store + slices
+│   │   └── types/            # TypeScript types
 │   └── package.json
 │
 ├── backend/                  # Express API (COMPLETE)
@@ -81,6 +88,11 @@ COOKIE_EXPIRE=7
 FRONTEND_URL=http://localhost:3000
 ```
 
+Create `frontend/.env.local`:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
+```
+
 ### Running
 
 ```bash
@@ -99,10 +111,12 @@ npm run dev:backend      # Backend only (port 5000)
 #### Phase 1B: Auth Routes - COMPLETED
 - [x] Register, Login, Logout, Me, Update Profile, Change Password
 
-#### Phase 1C: Frontend Auth - PENDING
-- [ ] Redux store setup
-- [ ] Login/Register pages
-- [ ] Protected routes
+#### Phase 1C: Frontend Auth - COMPLETED
+- [x] Redux store setup with auth slice
+- [x] Login/Register pages with form validation
+- [x] Protected routes with role-based access
+- [x] Landing page with hero section
+- [x] Dashboard layout with sidebar navigation
 
 ### Phase 2: Core Backend - COMPLETED
 

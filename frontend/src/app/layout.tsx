@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LenisProvider from "@/providers/LenisProvider";
+import ReduxProvider from "@/providers/ReduxProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LearnInsight",
-  description: "LearnInsight - Your Learning Platform",
+  description: "LearnInsight - AI-Powered Learning Progress & Insight Platform",
 };
 
 export default function RootLayout({
@@ -28,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LenisProvider>{children}</LenisProvider>
+        <ReduxProvider>
+          <LenisProvider>{children}</LenisProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
