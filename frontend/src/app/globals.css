@@ -61,9 +61,9 @@ img, video, svg {
   --color-secondary-light: rgba(59, 130, 246, 0.15);
   --color-secondary-glow: rgba(59, 130, 246, 0.3);
 
-  /* Typography - Rubik Burned for display, Space Mono for body */
-  --font-display: "Rubik Burned", cursive;
-  --font-body: var(--font-space-mono), "Space Mono", monospace;
+  /* Typography - Poppins for both display and body */
+  --font-display: var(--font-poppins), "Poppins", sans-serif;
+  --font-body: var(--font-poppins), "Poppins", sans-serif;
 
   /* Spacing */
   --container-max: 1200px;
@@ -286,4 +286,30 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Shimmer text animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    #F97316 0%,
+    #FB923C 25%,
+    #FDBA74 50%,
+    #FB923C 75%,
+    #F97316 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
 }

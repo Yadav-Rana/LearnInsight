@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui";
 
 export default function CTASection() {
   return (
@@ -20,7 +21,7 @@ export default function CTASection() {
             className="text-2xl md:text-3xl lg:text-4xl mb-4"
             style={{
               fontFamily: "var(--font-display)",
-              fontWeight: 400,
+              fontWeight: 600,
               lineHeight: "1.2",
               color: "var(--text-primary)",
             }}
@@ -40,19 +41,9 @@ export default function CTASection() {
           </p>
 
           <Link href="/register">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              className="px-8 py-3 rounded-full text-sm cursor-pointer"
-              style={{
-                fontFamily: "var(--font-body)",
-                background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
-                color: "#ffffff",
-              }}
-            >
+            <Button variant="orange" size="lg">
               Get Started
-            </motion.button>
+            </Button>
           </Link>
         </motion.div>
       </div>

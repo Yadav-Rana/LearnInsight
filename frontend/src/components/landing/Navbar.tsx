@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui";
 
 const navLinks = [
   { href: "#features", label: "Features" },
@@ -25,6 +26,22 @@ export default function Navbar() {
     setIsMobileMenuOpen(false);
   };
 
+  // Glass effect styles - translucent when scrolled
+  const getBarStyle = () => {
+    if (isScrolled) {
+      return {
+        background: "rgba(17, 17, 17, 0.4)",
+        backdropFilter: "blur(16px)",
+        WebkitBackdropFilter: "blur(16px)",
+      };
+    }
+    return {
+      background: "transparent",
+      backdropFilter: "none",
+      WebkitBackdropFilter: "none",
+    };
+  };
+
   return (
     <>
       {/* Floating Navbar Container */}
@@ -34,20 +51,16 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
-          className="flex items-center px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all duration-300"
-          style={{
-            background: isScrolled ? "rgba(17, 17, 17, 0.9)" : "transparent",
-            backdropFilter: isScrolled ? "blur(20px)" : "none",
-            WebkitBackdropFilter: isScrolled ? "blur(20px)" : "none",
-            boxShadow: isScrolled ? "0 4px 24px rgba(0, 0, 0, 0.3)" : "none",
-          }}
+          className="flex items-center px-4 py-2.5 rounded-xl transition-all duration-300"
+          style={getBarStyle()}
         >
           {/* Logo - Text only */}
           <Link href="/">
             <span
-              className="text-lg sm:text-xl"
+              className="text-base sm:text-lg"
               style={{
                 fontFamily: "var(--font-display)",
+                fontWeight: 600,
                 color: "var(--text-primary)",
               }}
             >
@@ -55,23 +68,20 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Spacer */}
-          <div className="hidden lg:block w-8" />
-
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-1 ml-6">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="px-3 py-1.5 rounded-full text-sm transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer"
                 style={{
                   color: "var(--text-secondary)",
                   fontFamily: "var(--font-body)",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = "var(--text-primary)";
-                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
+                  e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.color = "var(--text-secondary)";
@@ -89,86 +99,77 @@ export default function Navbar() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-300"
+          style={getBarStyle()}
         >
           {/* Desktop buttons */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2">
             <Link
               href="/login"
-              className="px-4 py-2 text-sm transition-colors"
+              className="px-4 py-1.5 text-sm transition-colors rounded-full"
               style={{
                 color: "var(--text-secondary)",
                 fontFamily: "var(--font-body)",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.color = "var(--text-primary)";
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.color = "var(--text-secondary)";
+                e.currentTarget.style.background = "transparent";
               }}
             >
               Sign In
             </Link>
             <Link href="/register">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                className="px-5 py-2 rounded-full text-sm cursor-pointer"
-                style={{
-                  fontFamily: "var(--font-body)",
-                  background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
-                  color: "#ffffff",
-                }}
-              >
+              <Button variant="orange" size="sm">
                 Get Started
-              </motion.button>
+              </Button>
             </Link>
           </div>
 
           {/* Mobile CTA */}
           <div className="lg:hidden">
             <Link href="/register">
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                className="px-3 py-1.5 rounded-full text-xs cursor-pointer"
-                style={{
-                  fontFamily: "var(--font-body)",
-                  background: "linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%)",
-                  color: "#ffffff",
-                }}
-              >
+              <Button variant="orange" size="sm">
                 Get Started
-              </motion.button>
+              </Button>
             </Link>
           </div>
 
-          {/* Hamburger Menu Button - Simple lines */}
+          {/* Hamburger Menu Button */}
           <motion.button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             whileTap={{ scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden p-2 cursor-pointer"
+            className="lg:hidden p-1.5 cursor-pointer rounded-lg transition-colors"
             style={{ color: "var(--text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
             aria-label="Toggle menu"
           >
-            <div className="w-5 flex flex-col gap-1">
+            <div className="w-4 flex flex-col gap-1">
               <span
-                className="block h-0.5 w-full transition-transform"
+                className="block h-0.5 w-full transition-all duration-300"
                 style={{
                   background: "currentColor",
                   transform: isMobileMenuOpen ? "rotate(45deg) translateY(6px)" : "none",
                 }}
               />
               <span
-                className="block h-0.5 w-full transition-opacity"
+                className="block h-0.5 w-full transition-all duration-300"
                 style={{
                   background: "currentColor",
                   opacity: isMobileMenuOpen ? 0 : 1,
                 }}
               />
               <span
-                className="block h-0.5 w-full transition-transform"
+                className="block h-0.5 w-full transition-all duration-300"
                 style={{
                   background: "currentColor",
                   transform: isMobileMenuOpen ? "rotate(-45deg) translateY(-6px)" : "none",
@@ -179,31 +180,40 @@ export default function Navbar() {
         </motion.div>
       </nav>
 
-      {/* Mobile Menu Sidepanel */}
+      {/* Mobile Menu Dropdown */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-16 right-4 w-48 z-40 lg:hidden overflow-hidden rounded-lg"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-20 right-4 w-48 z-40 lg:hidden overflow-hidden rounded-xl"
             style={{
-              background: "var(--bg-secondary)",
-              border: "1px solid var(--border-color)",
+              background: "rgba(17, 17, 17, 0.95)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
             }}
           >
-            <div className="py-2 px-2">
-              <nav className="flex flex-col">
+            <div className="py-3 px-2">
+              <nav className="flex flex-col gap-1">
                 {navLinks.map((link) => (
                   <a
                     key={link.href}
                     href={link.href}
                     onClick={handleLinkClick}
-                    className="px-3 py-2 text-sm transition-colors"
+                    className="px-3 py-2 text-sm transition-colors rounded-lg"
                     style={{
                       color: "var(--text-secondary)",
                       fontFamily: "var(--font-body)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                      e.currentTarget.style.color = "var(--text-primary)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = "var(--text-secondary)";
                     }}
                   >
                     {link.label}
@@ -211,17 +221,25 @@ export default function Navbar() {
                 ))}
 
                 <div
-                  className="my-1 mx-3"
-                  style={{ borderTop: "1px solid var(--border-color)" }}
+                  className="my-2 mx-2"
+                  style={{ borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}
                 />
 
                 <Link
                   href="/login"
                   onClick={handleLinkClick}
-                  className="px-3 py-2 text-sm"
+                  className="px-3 py-2 text-sm rounded-lg transition-colors"
                   style={{
                     color: "var(--text-secondary)",
                     fontFamily: "var(--font-body)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                    e.currentTarget.style.color = "var(--text-primary)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.color = "var(--text-secondary)";
                   }}
                 >
                   Sign In
