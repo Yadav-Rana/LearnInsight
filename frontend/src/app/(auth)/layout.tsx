@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import Navbar from "@/components/landing/Navbar";
+import Footer from "@/components/landing/Footer";
+import { GridBackground, GlowingOrbs, Particles } from "@/components/ui";
 
 export default function AuthLayout({
   children,
@@ -22,8 +25,14 @@ export default function AuthLayout({
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: "var(--bg-primary)" }}
+      >
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-b-2"
+          style={{ borderColor: "#F97316" }}
+        />
       </div>
     );
   }
@@ -34,10 +43,28 @@ export default function AuthLayout({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        {children}
-      </div>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: "var(--bg-primary)" }}
+    >
+      <Navbar />
+
+      {/* Main content with background effects */}
+      <main className="flex-1 relative flex items-center justify-center px-4 pt-32 md:pt-36 pb-16">
+        {/* Background effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <GridBackground />
+          <GlowingOrbs />
+          <Particles count={35} color="#F97316" />
+        </div>
+
+        {/* Auth content */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto">
+          {children}
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
