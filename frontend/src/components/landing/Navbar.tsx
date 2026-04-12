@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui";
 
 const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#benefits", label: "Benefits" },
+  { href: "/#features", label: "Features" },
+  { href: "/#benefits", label: "Benefits" },
   { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export default function Navbar() {
@@ -151,27 +152,7 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 ml-6">
             {navLinks.map((link) =>
-              link.href.startsWith("#") ? (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="px-3 py-1.5 rounded-lg text-sm transition-colors cursor-pointer"
-                  style={{
-                    color: "var(--text-secondary)",
-                    fontFamily: "var(--font-body)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.color = "var(--text-primary)";
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.color = "var(--text-secondary)";
-                    e.currentTarget.style.background = "transparent";
-                  }}
-                >
-                  {link.label}
-                </a>
-              ) : (
+              
                 <Link
                   key={link.href}
                   href={link.href}
@@ -191,7 +172,7 @@ export default function Navbar() {
                 >
                   {link.label}
                 </Link>
-              )
+
             )}
           </div>
         </motion.div>
@@ -299,29 +280,7 @@ export default function Navbar() {
           >
             <div className="py-3 px-2">
               <nav className="flex flex-col gap-1">
-                {navLinks.map((link) =>
-                  link.href.startsWith("#") ? (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      onClick={handleLinkClick}
-                      className="px-3 py-2 text-sm transition-colors rounded-lg"
-                      style={{
-                        color: "var(--text-secondary)",
-                        fontFamily: "var(--font-body)",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-                        e.currentTarget.style.color = "var(--text-primary)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.color = "var(--text-secondary)";
-                      }}
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
+                {navLinks.map((link) => (
                     <Link
                       key={link.href}
                       href={link.href}
@@ -342,8 +301,7 @@ export default function Navbar() {
                     >
                       {link.label}
                     </Link>
-                  )
-                )}
+                ))}
 
                 <div
                   className="my-2 mx-2"

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui";
 
+const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+
 const faqs = [
   {
     question: "Is LearnInsight free to use?",
@@ -32,20 +34,40 @@ export default function ContactPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError("");
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          access_key: WEB3FORMS_ACCESS_KEY,
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message,
+        }),
+      });
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    setFormData({ name: "", email: "", subject: "", message: "" });
+      const result = await response.json();
 
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSubmitted(false), 5000);
+      if (result.success) {
+        setIsSubmitted(true);
+        setFormData({ name: "", email: "", subject: "", message: "" });
+        setTimeout(() => setIsSubmitted(false), 5000);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } catch {
+      setError("Failed to send message. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -160,6 +182,22 @@ export default function ContactPage() {
                 </motion.div>
               )}
 
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 rounded-xl"
+                  style={{
+                    background: "rgba(239, 68, 68, 0.1)",
+                    border: "1px solid rgba(239, 68, 68, 0.3)",
+                  }}
+                >
+                  <p className="text-sm" style={{ color: "#ef4444" }}>
+                    {error}
+                  </p>
+                </motion.div>
+              )}
+
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -232,16 +270,19 @@ export default function ContactPage() {
                     onChange={handleChange}
                     required
                     className={`${inputClasses} cursor-pointer`}
-                    style={inputStyle}
+                    style={{
+                      ...inputStyle,
+                      backgroundColor: "#1a1a1a",
+                    }}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                   >
-                    <option value="">Select a topic</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="support">Technical Support</option>
-                    <option value="feedback">Feedback</option>
-                    <option value="partnership">Partnership</option>
-                    <option value="other">Other</option>
+                    <option value="" style={{ backgroundColor: "#1a1a1a", color: "#999" }}>Select a topic</option>
+                    <option value="general" style={{ backgroundColor: "#1a1a1a", color: "#e5e5e5" }}>General Inquiry</option>
+                    <option value="support" style={{ backgroundColor: "#1a1a1a", color: "#e5e5e5" }}>Technical Support</option>
+                    <option value="feedback" style={{ backgroundColor: "#1a1a1a", color: "#e5e5e5" }}>Feedback</option>
+                    <option value="partnership" style={{ backgroundColor: "#1a1a1a", color: "#e5e5e5" }}>Partnership</option>
+                    <option value="other" style={{ backgroundColor: "#1a1a1a", color: "#e5e5e5" }}>Other</option>
                   </select>
                 </div>
 
