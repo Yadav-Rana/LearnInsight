@@ -142,10 +142,10 @@ export default function QuizzesPage() {
           className="px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
           style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
         >
-          <option value="">All Difficulties</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
+          <option value="" style={{ background: "#1a1a2e" }}>All Difficulties</option>
+          <option value="easy" style={{ background: "#1a1a2e" }}>Easy</option>
+          <option value="medium" style={{ background: "#1a1a2e" }}>Medium</option>
+          <option value="hard" style={{ background: "#1a1a2e" }}>Hard</option>
         </select>
       </div>
 

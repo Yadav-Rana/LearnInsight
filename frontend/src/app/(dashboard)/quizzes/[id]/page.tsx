@@ -40,6 +40,7 @@ export default function QuizDetailPage() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [startedAt, setStartedAt] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{
     score: number;
@@ -90,6 +91,7 @@ export default function QuizDetailPage() {
     setIsTaking(true);
     setCurrentQuestion(0);
     setAnswers(new Array(quiz.questions.length).fill(null));
+    setStartedAt(new Date().toISOString());
     if (quiz.timeLimit) {
       setTimeLeft(quiz.timeLimit * 60);
     }
@@ -107,13 +109,16 @@ export default function QuizDetailPage() {
 
     try {
       setSubmitting(true);
-      const startTime = quiz.timeLimit ? quiz.timeLimit * 60 : 0;
-      const timeTaken = timeLeft !== null ? startTime - timeLeft : 0;
+
+      const mappedAnswers = quiz.questions.map((q, i) => ({
+        questionId: q._id,
+        selectedAnswer: answers[i] ?? -1,
+      }));
 
       const response = await api.post("/attempts", {
-        quiz: quiz._id,
-        answers: answers.map((a) => (a === null ? -1 : a)),
-        timeTaken,
+        quizId: quiz._id,
+        answers: mappedAnswers,
+        startedAt,
       });
 
       setResult({
@@ -128,7 +133,7 @@ export default function QuizDetailPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [quiz, answers, timeLeft, submitting]);
+  }, [quiz, answers, startedAt, submitting]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

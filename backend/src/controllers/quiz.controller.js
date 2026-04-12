@@ -136,7 +136,7 @@ const createQuiz = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Quiz created successfully",
-    quiz,
+    data: quiz,
   });
 });
 
@@ -191,7 +191,7 @@ const updateQuiz = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Quiz updated successfully",
-    quiz,
+    data: quiz,
   });
 });
 
@@ -300,7 +300,7 @@ const duplicateQuiz = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Quiz duplicated successfully",
-    quiz: duplicatedQuiz,
+    data: duplicatedQuiz,
   });
 });
 

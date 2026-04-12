@@ -24,8 +24,8 @@ const {
 router.use(protect);
 
 // Admin only routes
-router.get("/", authorize("admin"), getUsers);
-router.get("/role/:role", authorize("admin"), getUsersByRole);
+router.get("/", authorize("admin", "teacher"), getUsers);
+router.get("/role/:role", authorize("admin", "teacher"), getUsersByRole);
 
 router
   .route("/:id")

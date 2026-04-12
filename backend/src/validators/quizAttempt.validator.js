@@ -12,7 +12,7 @@ const submitAttemptValidator = [
     .withMessage("Valid question ID is required"),
 
   body("answers.*.selectedAnswer")
-    .isInt({ min: 0 })
+    .isInt({ min: -1 })
     .withMessage("Selected answer index is required"),
 
   body("startedAt")
