@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
+import { EmptyState } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Subject {
@@ -25,6 +27,36 @@ interface Subject {
   }>;
   createdAt: string;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const modalOverlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
+
+const modalContentVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 10 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.25, ease: [0.4, 0, 0.2, 1] as const } },
+  exit: { opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.15 } },
+};
+
+const accentColors = [
+  "#3B82F6",
+  "#22C55E",
+  "#A855F7",
+  "#F97316",
+  "#EC4899",
+];
 
 export default function SubjectsPage() {
   const { user } = useAuth();
@@ -118,7 +150,7 @@ export default function SubjectsPage() {
           placeholder="Search subjects..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl transition-all duration-200 focus:outline-none"
+          className="w-full pl-12 pr-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
           style={{
             background: "rgba(255, 255, 255, 0.05)",
             border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -144,51 +176,47 @@ export default function SubjectsPage() {
 
       {/* Subjects Grid */}
       {rootSubjects.length === 0 ? (
-        <div
-          className="text-center py-16 rounded-2xl"
-          style={{
-            background: "rgba(20, 20, 25, 0.6)",
-            backdropFilter: "blur(20px)",
-            border: "1px solid rgba(255, 255, 255, 0.06)",
-          }}
-        >
-          <div
-            className="w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-4"
-            style={{
-              background: "rgba(255, 255, 255, 0.05)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
-            }}
-          >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "rgba(255, 255, 255, 0.3)" }}>
+        <EmptyState
+          icon={
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "rgba(255, 255, 255, 0.3)" }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
-          </div>
-          <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
-            No subjects found
-          </h3>
-          <p className="mt-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
-            {isTeacherOrAdmin ? "Create your first subject to get started." : "No subjects available yet. Check back later!"}
-          </p>
-        </div>
+          }
+          title="No subjects found"
+          description={isTeacherOrAdmin ? "Create your first subject to get started." : "No subjects available yet. Check back later!"}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {rootSubjects.map((subject) => (
-            <SubjectCard key={subject._id} subject={subject} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={fetchSubjects} />
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {rootSubjects.map((subject, index) => (
+            <SubjectCard
+              key={subject._id}
+              subject={subject}
+              isTeacherOrAdmin={isTeacherOrAdmin}
+              onDelete={fetchSubjects}
+              index={index}
+            />
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Create Modal */}
-      {showCreateModal && (
-        <CreateSubjectModal
-          onClose={() => setShowCreateModal(false)}
-          onSuccess={() => {
-            setShowCreateModal(false);
-            fetchSubjects();
-          }}
-          subjects={subjects}
-        />
-      )}
+      <AnimatePresence>
+        {showCreateModal && (
+          <CreateSubjectModal
+            onClose={() => setShowCreateModal(false)}
+            onSuccess={() => {
+              setShowCreateModal(false);
+              fetchSubjects();
+            }}
+            subjects={subjects}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -197,10 +225,12 @@ interface SubjectCardProps {
   subject: Subject;
   isTeacherOrAdmin: boolean;
   onDelete: () => void;
+  index: number;
 }
 
-function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) {
+function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCardProps) {
   const [deleting, setDeleting] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this subject?")) return;
@@ -225,14 +255,24 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) 
   ];
   const colorIndex = subject.name.charCodeAt(0) % iconColors.length;
   const colors = iconColors[colorIndex];
+  const accentColor = accentColors[colorIndex];
+
+  const resourceCount = subject.resources?.length || 0;
+  const maxResources = 10;
+  const progressPercent = Math.min((resourceCount / maxResources) * 100, 100);
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden transition-all duration-200 hover:translate-y-[-2px]"
+    <motion.div
+      variants={itemVariants}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="rounded-2xl overflow-hidden transition-all duration-200"
       style={{
         background: "rgba(20, 20, 25, 0.6)",
         backdropFilter: "blur(20px)",
-        border: "1px solid rgba(255, 255, 255, 0.06)",
+        border: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
+        borderLeft: `3px solid ${accentColor}`,
+        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
       }}
     >
       <div className="p-6">
@@ -249,7 +289,7 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) 
             <div className="flex gap-1">
               <Link
                 href={`/subjects/${subject._id}/edit`}
-                className="p-2 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors hover:bg-white/5"
                 style={{ color: "rgba(255, 255, 255, 0.4)" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +299,7 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) 
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="p-2 rounded-lg transition-colors disabled:opacity-50"
+                className="p-2 rounded-lg transition-colors hover:bg-white/5 disabled:opacity-50"
                 style={{ color: "rgba(255, 255, 255, 0.4)" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -277,13 +317,29 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) 
           {subject.description || "No description available"}
         </p>
 
-        <div className="mt-4 flex items-center gap-4 text-sm" style={{ color: "var(--text-muted)" }}>
-          <span className="flex items-center gap-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
-            {subject.resources?.length || 0} resources
-          </span>
+        {/* Resource count with progress bar */}
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-sm" style={{ color: "var(--text-muted)" }}>
+            <span className="flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              {resourceCount} resources
+            </span>
+          </div>
+          <div
+            className="h-1 rounded-full overflow-hidden"
+            style={{ background: "rgba(255, 255, 255, 0.06)" }}
+          >
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{
+                width: `${progressPercent}%`,
+                background: accentColor,
+                opacity: 0.7,
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -295,7 +351,7 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) 
           View Details →
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -327,20 +383,31 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div
+      <motion.div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+        variants={modalOverlayVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      />
+      <motion.div
         className="relative w-full max-w-md rounded-2xl"
         style={{
           background: "rgba(20, 20, 25, 0.95)",
           backdropFilter: "blur(20px)",
           border: "1px solid rgba(255, 255, 255, 0.1)",
         }}
+        variants={modalContentVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
       >
         <div className="flex items-center justify-between p-6" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
           <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
             Create Subject
           </h2>
-          <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+          <button onClick={onClose} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -363,7 +430,7 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none"
+              className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
               style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)" }}
               placeholder="e.g., Mathematics"
             />
@@ -377,7 +444,7 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
-              className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none resize-none"
+              className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30 resize-none"
               style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)" }}
               placeholder="Brief description..."
             />
@@ -390,7 +457,7 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
             <select
               value={formData.parent}
               onChange={(e) => setFormData({ ...formData, parent: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none"
+              className="w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
               style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)" }}
             >
               <option value="">None (Root Subject)</option>
@@ -404,7 +471,7 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-3 rounded-xl font-medium transition-colors"
+              className="flex-1 px-4 py-3 rounded-xl font-medium transition-colors hover:bg-white/5"
               style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-secondary)" }}
             >
               Cancel
@@ -419,7 +486,7 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
