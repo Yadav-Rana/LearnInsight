@@ -76,7 +76,7 @@ export default function SubjectsPage() {
     try {
       setLoading(true);
       const response = await api.get("/subjects");
-      setSubjects(response.data.data || []);
+      setSubjects(response.data.data || response.data.subjects || []);
     } catch (err) {
       setError("Failed to load subjects");
       console.error(err);

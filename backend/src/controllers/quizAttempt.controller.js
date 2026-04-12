@@ -72,7 +72,7 @@ const submitAttempt = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: passed ? "Congratulations! You passed!" : "Keep practicing!",
-    attempt: {
+    data: {
       id: attempt._id,
       score,
       totalPoints: quiz.totalPoints,
@@ -135,7 +135,7 @@ const getMyAttempts = asyncHandler(async (req, res, next) => {
     total,
     page: parseInt(page),
     pages: Math.ceil(total / parseInt(limit)),
-    attempts,
+    data: attempts,
   });
 });
 
@@ -166,7 +166,7 @@ const getAttempt = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    attempt,
+    data: attempt,
   });
 });
 
@@ -217,7 +217,7 @@ const getAttemptsByQuiz = asyncHandler(async (req, res, next) => {
     page: parseInt(page),
     pages: Math.ceil(total / parseInt(limit)),
     stats,
-    attempts,
+    data: attempts,
   });
 });
 
@@ -235,14 +235,14 @@ const getBestAttempt = asyncHandler(async (req, res, next) => {
   if (!attempt) {
     return res.status(200).json({
       success: true,
-      attempt: null,
+      data: null,
       message: "No attempts found for this quiz",
     });
   }
 
   res.status(200).json({
     success: true,
-    attempt,
+    data: attempt,
   });
 });
 

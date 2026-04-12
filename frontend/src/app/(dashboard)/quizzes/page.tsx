@@ -50,7 +50,7 @@ export default function QuizzesPage() {
     try {
       setLoading(true);
       const response = await api.get("/quizzes");
-      setQuizzes(response.data.data || []);
+      setQuizzes(response.data.data || response.data.quizzes || []);
     } catch (err) {
       setError("Failed to load quizzes");
       console.error(err);

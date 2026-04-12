@@ -100,7 +100,7 @@ const generateInsights = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "Insights generated successfully",
-    insight,
+    data: insight,
   });
 });
 
@@ -204,14 +204,14 @@ const getLatestInsight = asyncHandler(async (req, res, next) => {
   if (!insight) {
     return res.status(200).json({
       success: true,
-      insight: null,
+      data: null,
       message: "No insights generated yet. Generate your first insight!",
     });
   }
 
   res.status(200).json({
     success: true,
-    insight,
+    data: insight,
   });
 });
 
@@ -240,7 +240,7 @@ const getMyInsights = asyncHandler(async (req, res, next) => {
     total,
     page: parseInt(page),
     pages: Math.ceil(total / parseInt(limit)),
-    insights,
+    data: insights,
   });
 });
 
@@ -276,7 +276,7 @@ const getInsight = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    insight,
+    data: insight,
   });
 });
 
@@ -295,7 +295,7 @@ const getStudentInsights = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     count: insights.length,
-    insights,
+    data: insights,
   });
 });
 

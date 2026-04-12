@@ -59,7 +59,7 @@ const getQuizzes = asyncHandler(async (req, res, next) => {
     total,
     page: parseInt(page),
     pages: Math.ceil(total / parseInt(limit)),
-    quizzes,
+    data: quizzes,
   });
 });
 
@@ -95,7 +95,7 @@ const getQuiz = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    quiz,
+    data: quiz,
   });
 });
 
@@ -268,7 +268,7 @@ const getQuizzesBySubject = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     count: quizzes.length,
-    quizzes,
+    data: quizzes,
   });
 });
 

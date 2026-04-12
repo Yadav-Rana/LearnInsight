@@ -102,11 +102,10 @@ const quizSchema = new mongoose.Schema(
 );
 
 // Calculate total points before saving
-quizSchema.pre("save", function (next) {
+quizSchema.pre("save", function () {
   if (this.questions && this.questions.length > 0) {
     this.totalPoints = this.questions.reduce((sum, q) => sum + (q.points || 1), 0);
   }
-  next();
 });
 
 // Index for faster queries

@@ -40,7 +40,7 @@ const getMyProgress = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     overallStats,
-    progress,
+    data: progress,
   });
 });
 
@@ -71,7 +71,7 @@ const getProgressBySubject = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      progress: {
+      data: {
         subject: {
           _id: subject._id,
           name: subject.name,
@@ -93,7 +93,7 @@ const getProgressBySubject = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    progress,
+    data: progress,
   });
 });
 
@@ -200,7 +200,7 @@ const getStudentProgress = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     student,
-    progress,
+    data: progress,
   });
 });
 
@@ -237,7 +237,7 @@ const getSubjectStudentsProgress = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     stats,
-    progress,
+    data: progress,
   });
 });
 

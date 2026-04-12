@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -97,11 +97,10 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [showReveal, setShowReveal] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-  const hasShownReveal = useRef(false);
 
   useEffect(() => {
-    if (!hasShownReveal.current) {
-      hasShownReveal.current = true;
+    if (!sessionStorage.getItem("dashboardRevealed")) {
+      sessionStorage.setItem("dashboardRevealed", "1");
       setShowReveal(true);
     }
   }, []);

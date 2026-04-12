@@ -51,7 +51,7 @@ const getSubjects = asyncHandler(async (req, res, next) => {
   res.status(200).json({
     success: true,
     count: subjects.length,
-    subjects,
+    data: subjects,
   });
 });
 
@@ -75,7 +75,7 @@ const getSubject = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    subject,
+    data: subject,
   });
 });
 
