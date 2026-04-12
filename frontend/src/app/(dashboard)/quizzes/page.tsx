@@ -90,7 +90,7 @@ export default function QuizzesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
             Quizzes
           </h1>
           <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
@@ -154,7 +154,7 @@ export default function QuizzesPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>No quizzes found</h3>
+          <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>No quizzes found</h3>
           <p className="mt-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
             {isTeacherOrAdmin ? "Create your first quiz to get started." : "No quizzes available yet. Check back later!"}
           </p>
@@ -226,7 +226,7 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
           )}
         </div>
 
-        <h3 className="mt-4 text-lg font-semibold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>{quiz.title}</h3>
+        <h3 className="mt-4 text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>{quiz.title}</h3>
         <p className="mt-1 text-sm line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>{quiz.description || "No description available"}</p>
 
         <div className="mt-4 flex items-center gap-4 text-sm" style={{ color: "var(--text-muted)" }}>

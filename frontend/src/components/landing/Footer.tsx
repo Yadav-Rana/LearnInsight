@@ -33,7 +33,7 @@ export default function Footer() {
               <span
                 className="text-lg"
                 style={{
-                  fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                  fontFamily: "var(--font-display)",
                   fontWeight: 700,
                   letterSpacing: "0.02em",
                 }}

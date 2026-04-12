@@ -119,7 +119,7 @@ export default function ContactPage() {
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 color: "var(--text-primary)",
               }}
             >
@@ -159,7 +159,7 @@ export default function ContactPage() {
               <h2
                 className="text-2xl font-bold mb-6"
                 style={{
-                  fontFamily: "var(--font-hk-grotesk)",
+                  fontFamily: "var(--font-display)",
                   color: "var(--text-primary)",
                 }}
               >
@@ -353,7 +353,7 @@ export default function ContactPage() {
               <h2
                 className="text-2xl font-bold mb-6"
                 style={{
-                  fontFamily: "var(--font-hk-grotesk)",
+                  fontFamily: "var(--font-display)",
                   color: "var(--text-primary)",
                 }}
               >

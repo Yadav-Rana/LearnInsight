@@ -74,7 +74,7 @@ export default function AboutPage() {
             <h1
               className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 color: "var(--text-primary)",
               }}
             >
@@ -121,7 +121,7 @@ export default function AboutPage() {
               <h2
                 className="text-3xl md:text-4xl font-bold mb-6"
                 style={{
-                  fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                  fontFamily: "var(--font-display)",
                   color: "var(--text-primary)",
                 }}
               >
@@ -174,7 +174,7 @@ export default function AboutPage() {
                     <div
                       className="text-3xl md:text-4xl font-bold mb-2"
                       style={{
-                        fontFamily: "var(--font-hk-grotesk)",
+                        fontFamily: "var(--font-display)",
                         color: index % 2 === 0 ? "#F97316" : "#3B82F6",
                       }}
                     >
@@ -220,7 +220,7 @@ export default function AboutPage() {
             <h2
               className="text-3xl md:text-4xl font-bold"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 color: "var(--text-primary)",
               }}
             >
@@ -254,7 +254,7 @@ export default function AboutPage() {
                 <h3
                   className="text-xl font-bold mb-3"
                   style={{
-                    fontFamily: "var(--font-hk-grotesk)",
+                    fontFamily: "var(--font-display)",
                     color: "var(--text-primary)",
                   }}
                 >
@@ -293,7 +293,7 @@ export default function AboutPage() {
           <h2
             className="text-3xl md:text-4xl font-bold mb-4"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >

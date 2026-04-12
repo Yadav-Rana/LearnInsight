@@ -94,7 +94,7 @@ function VisualArea({ item, animationKey }: { item: CardItem; animationKey: numb
             <span
               className="text-lg md:text-xl font-medium"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 color: item.color,
               }}
             >
@@ -122,7 +122,7 @@ function VisualArea({ item, animationKey }: { item: CardItem; animationKey: numb
                   <div
                     className="text-lg font-bold"
                     style={{
-                      fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                      fontFamily: "var(--font-display)",
                       color: item.color,
                     }}
                   >
@@ -182,7 +182,7 @@ function ContentArea({
           <h4
             className="text-xl md:text-2xl lg:text-3xl"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               fontWeight: 600,
               color: "var(--text-primary)",
             }}
@@ -211,7 +211,7 @@ function ContentArea({
                 <div
                   className="text-2xl md:text-3xl font-bold mb-1"
                   style={{
-                    fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                    fontFamily: "var(--font-display)",
                     color: item.color,
                   }}
                 >

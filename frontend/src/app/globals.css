@@ -61,9 +61,9 @@ img, video, svg {
   --color-secondary-light: rgba(59, 130, 246, 0.15);
   --color-secondary-glow: rgba(59, 130, 246, 0.3);
 
-  /* Typography - HK Grotesk for display, Poppins for body */
-  --font-display: var(--font-hk-grotesk), "HK Grotesk", sans-serif;
-  --font-body: var(--font-poppins), "Poppins", sans-serif;
+  /* Typography - Space Grotesk throughout */
+  --font-display: var(--font-space-grotesk), "Space Grotesk", sans-serif;
+  --font-body: var(--font-space-grotesk), "Space Grotesk", sans-serif;
 
   /* Spacing */
   --container-max: 1200px;

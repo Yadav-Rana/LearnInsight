@@ -30,7 +30,7 @@ export default function DashboardPage() {
           <h1
             className="text-3xl md:text-4xl font-bold"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >
@@ -111,7 +111,7 @@ export default function DashboardPage() {
           <h2
             className="text-lg font-semibold mb-4"
             style={{
-              fontFamily: "var(--font-hk-grotesk)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >
@@ -159,7 +159,7 @@ export default function DashboardPage() {
           <h2
             className="text-lg font-semibold mb-4"
             style={{
-              fontFamily: "var(--font-hk-grotesk)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >
@@ -208,7 +208,7 @@ export default function DashboardPage() {
         <h2
           className="text-lg font-semibold mb-4"
           style={{
-            fontFamily: "var(--font-hk-grotesk)",
+            fontFamily: "var(--font-display)",
             color: "var(--text-primary)",
           }}
         >
@@ -322,7 +322,7 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
           </p>
           <p
             className="text-2xl font-bold"
-            style={{ color: "var(--text-primary)", fontFamily: "var(--font-hk-grotesk)" }}
+            style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}
           >
             {value}
           </p>

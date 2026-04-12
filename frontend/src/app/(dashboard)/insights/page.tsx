@@ -93,7 +93,7 @@ export default function InsightsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>AI Insights</h1>
+          <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>AI Insights</h1>
           <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Personalized recommendations based on your learning patterns</p>
         </div>
         <button
@@ -126,7 +126,7 @@ export default function InsightsPage() {
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)", border: "1px solid rgba(168, 85, 247, 0.3)" }}>
             <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
           </div>
-          <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>No Insights Yet</h3>
+          <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>No Insights Yet</h3>
           <p className="max-w-md mx-auto mb-6" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
             Complete some quizzes first, then our AI will analyze your performance and provide personalized recommendations.
           </p>
@@ -150,7 +150,7 @@ export default function InsightsPage() {
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold mb-2" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>AI Summary</h3>
+                  <h3 className="font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>AI Summary</h3>
                   <p style={{ fontFamily: "var(--font-body)", color: "var(--text-secondary)", lineHeight: 1.7 }}>{insight.aiSummary}</p>
                 </div>
               </div>
@@ -160,7 +160,7 @@ export default function InsightsPage() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Weak Areas */}
             <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-              <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>
+              <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#F97316" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 Areas to Improve
               </h3>
@@ -189,7 +189,7 @@ export default function InsightsPage() {
 
             {/* Recommendations */}
             <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-              <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>
+              <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#3B82F6" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
                 Recommended Resources
               </h3>
@@ -219,7 +219,7 @@ export default function InsightsPage() {
 
           {/* Learning Tips */}
           <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>
+            <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#22C55E" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
               Learning Tips
             </h3>

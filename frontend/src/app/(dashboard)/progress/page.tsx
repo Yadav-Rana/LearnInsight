@@ -111,7 +111,7 @@ export default function ProgressPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>My Progress</h1>
+        <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>My Progress</h1>
         <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Track your learning journey and achievements</p>
       </div>
 
@@ -153,7 +153,7 @@ export default function ProgressPage() {
       {activeTab === "overview" && (
         <div className="grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>Performance Trend</h3>
+            <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>Performance Trend</h3>
             <div className="h-48 flex items-center justify-center rounded-xl" style={{ border: "2px dashed rgba(255, 255, 255, 0.1)" }}>
               <div className="text-center">
                 <div className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-3" style={{ background: "rgba(255, 255, 255, 0.05)" }}>
@@ -168,7 +168,7 @@ export default function ProgressPage() {
           </div>
 
           <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>Recent Activity</h3>
+            <h3 className="font-semibold mb-4" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>Recent Activity</h3>
             {recentAttempts.length === 0 ? (
               <div className="text-center py-8">
                 <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>No recent activity</p>
@@ -200,7 +200,7 @@ export default function ProgressPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>No subjects yet</h3>
+              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>No subjects yet</h3>
               <p className="mt-2" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Enroll in subjects to track your progress</p>
               <Link href="/subjects" className="mt-4 inline-block px-4 py-2 rounded-xl font-medium" style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)", color: "white" }}>Browse Subjects</Link>
             </div>
@@ -209,7 +209,7 @@ export default function ProgressPage() {
               <div key={progress._id} className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="font-semibold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>{progress.subject?.name || "Unknown Subject"}</h3>
+                    <h3 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>{progress.subject?.name || "Unknown Subject"}</h3>
                     <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>{progress.quizAttempts} quizzes taken &bull; {formatTime(progress.totalTimeSpent)} spent</p>
                   </div>
                   <Link href={`/subjects/${progress.subject?._id}`} className="text-sm font-medium" style={{ color: "#F97316" }}>View Details</Link>
@@ -239,7 +239,7 @@ export default function ProgressPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-hk-grotesk)", color: "var(--text-primary)" }}>No quiz history</h3>
+              <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>No quiz history</h3>
               <p className="mt-2" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Complete quizzes to see your history here</p>
               <Link href="/quizzes" className="mt-4 inline-block px-4 py-2 rounded-xl font-medium" style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)", color: "white" }}>Browse Quizzes</Link>
             </div>
@@ -300,7 +300,7 @@ function StatCard({ label, value, icon, color }: StatCardProps) {
           <span style={{ color: styles.icon }}>{icon}</span>
         </div>
         <div>
-          <p className="text-2xl font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-hk-grotesk)" }}>{value}</p>
+          <p className="text-2xl font-bold" style={{ color: "var(--text-primary)", fontFamily: "var(--font-display)" }}>{value}</p>
           <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>{label}</p>
         </div>
       </div>

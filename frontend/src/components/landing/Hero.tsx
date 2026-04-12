@@ -95,7 +95,7 @@ export default function Hero() {
             <span
               className="relative inline-block hero-text"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 fontWeight: 800,
                 lineHeight: "1",
                 letterSpacing: "0.04em",
@@ -122,7 +122,7 @@ export default function Hero() {
             <span
               className="relative inline-block hero-text"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 fontWeight: 800,
                 lineHeight: "1",
                 letterSpacing: "0.04em",
@@ -158,7 +158,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
             className="block hero-text-secondary mt-2 sm:mt-4"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               fontWeight: 600,
               lineHeight: "1.1",
               letterSpacing: "0.03em",

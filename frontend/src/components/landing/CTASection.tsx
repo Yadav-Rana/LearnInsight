@@ -60,7 +60,7 @@ export default function CTASection() {
           <h2
             className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl mb-6"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               fontWeight: 600,
               lineHeight: "1.1",
               color: "var(--text-primary)",
@@ -132,7 +132,7 @@ export default function CTASection() {
                 <div
                   className="text-2xl md:text-3xl lg:text-4xl font-bold mb-1"
                   style={{
-                    fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                    fontFamily: "var(--font-display)",
                     background: "linear-gradient(135deg, var(--color-primary), var(--color-secondary))",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
@@ -168,7 +168,7 @@ export default function CTASection() {
         <span
           className="text-[18vw] md:text-[16vw] lg:text-[14vw] whitespace-nowrap select-none"
           style={{
-            fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+            fontFamily: "var(--font-display)",
             fontWeight: 800,
             letterSpacing: "0.02em",
             color: "transparent",

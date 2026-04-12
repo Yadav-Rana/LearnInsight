@@ -140,7 +140,7 @@ export default function RegisterPage() {
           <h2
             className="text-4xl xl:text-5xl font-bold mb-4"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >
@@ -224,7 +224,7 @@ export default function RegisterPage() {
           <h1
             className="text-2xl md:text-3xl font-bold mb-2"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >

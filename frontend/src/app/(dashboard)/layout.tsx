@@ -146,7 +146,7 @@ export default function DashboardLayout({
                 <span
                   className="text-xl font-bold"
                   style={{
-                    fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                    fontFamily: "var(--font-display)",
                     background: "linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.8) 100%)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",

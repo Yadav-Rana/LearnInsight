@@ -115,7 +115,7 @@ export default function Preloader({
                 y="85"
                 textAnchor="middle"
                 style={{
-                  fontFamily: "var(--font-hk-grotesk), 'HK Grotesk', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "90px",
                   fontWeight: 800,
                   letterSpacing: "0.06em",
@@ -134,7 +134,7 @@ export default function Preloader({
                 textAnchor="middle"
                 clipPath="url(#waveClip)"
                 style={{
-                  fontFamily: "var(--font-hk-grotesk), 'HK Grotesk', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontSize: "90px",
                   fontWeight: 800,
                   letterSpacing: "0.06em",

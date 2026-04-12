@@ -121,7 +121,7 @@ export default function Navbar() {
             <span
               className="text-base sm:text-lg relative"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 fontWeight: 700,
                 letterSpacing: "0.02em",
                 color: "transparent",
@@ -138,7 +138,7 @@ export default function Navbar() {
             <span
               className="absolute inset-0 text-base sm:text-lg overflow-hidden"
               style={{
-                fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+                fontFamily: "var(--font-display)",
                 fontWeight: 700,
                 letterSpacing: "0.02em",
                 clipPath,

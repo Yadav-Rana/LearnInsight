@@ -158,7 +158,7 @@ export default function FeaturesSection() {
           <h2
             className="text-3xl md:text-4xl lg:text-5xl max-w-3xl mx-auto"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               fontWeight: 600,
               lineHeight: "1.1",
               color: "var(--text-primary)",

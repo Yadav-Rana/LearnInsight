@@ -37,7 +37,7 @@ export default function SectionHeader({
       <h3
         className="text-2xl md:text-3xl lg:text-4xl"
         style={{
-          fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+          fontFamily: "var(--font-display)",
           fontWeight: 600,
           lineHeight: "1.2",
           color: "var(--text-primary)",

@@ -61,7 +61,7 @@ export default function LoginPage() {
           <h1
             className="text-3xl md:text-4xl font-bold mb-3"
             style={{
-              fontFamily: "var(--font-hk-grotesk), var(--font-display)",
+              fontFamily: "var(--font-display)",
               color: "var(--text-primary)",
             }}
           >
