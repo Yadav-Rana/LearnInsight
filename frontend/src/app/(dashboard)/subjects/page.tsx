@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
-import { EmptyState } from "@/components/dashboard";
+import { EmptyState, GlassCard } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Subject {
@@ -230,7 +230,6 @@ interface SubjectCardProps {
 
 function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCardProps) {
   const [deleting, setDeleting] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete this subject?")) return;
@@ -262,21 +261,7 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCard
   const progressPercent = Math.min((resourceCount / maxResources) * 100, 100);
 
   return (
-    <motion.div
-      variants={itemVariants}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="rounded-2xl overflow-hidden transition-all duration-200"
-      style={{
-        background: "rgba(20, 20, 25, 0.6)",
-        backdropFilter: "blur(20px)",
-        borderTop: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
-        borderRight: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
-        borderBottom: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
-        borderLeft: `3px solid ${accentColor}`,
-        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
-      }}
-    >
+    <GlassCard accentColor={accentColor} padding="p-0">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div
@@ -353,7 +338,7 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCard
           View Details →
         </Link>
       </div>
-    </motion.div>
+    </GlassCard>
   );
 }
 

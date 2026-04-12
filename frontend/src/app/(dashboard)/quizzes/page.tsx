@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
-import { EmptyState } from "@/components/dashboard";
+import { EmptyState, GlassCard } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Quiz {
@@ -177,9 +177,7 @@ export default function QuizzesPage() {
           animate="visible"
         >
           {filteredQuizzes.map((quiz) => (
-            <motion.div key={quiz._id} variants={itemVariants}>
-              <QuizCard quiz={quiz} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={() => handleDelete(quiz._id)} onTogglePublish={() => handleTogglePublish(quiz._id)} />
-            </motion.div>
+            <QuizCard key={quiz._id} quiz={quiz} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={() => handleDelete(quiz._id)} onTogglePublish={() => handleTogglePublish(quiz._id)} />
           ))}
         </motion.div>
       )}
@@ -195,8 +193,6 @@ interface QuizCardProps {
 }
 
 function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
   const difficultyStyles = {
     easy: { bg: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.3)", color: "#22C55E" },
     medium: { bg: "rgba(234, 179, 8, 0.15)", border: "rgba(234, 179, 8, 0.3)", color: "#EAB308" },
@@ -205,17 +201,7 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
   const difficulty = difficultyStyles[quiz.difficulty];
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden transition-all duration-200"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{
-        background: "rgba(20, 20, 25, 0.6)",
-        backdropFilter: "blur(20px)",
-        border: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
-        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
-      }}
-    >
+    <GlassCard padding="p-0">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 flex-wrap">
@@ -286,6 +272,6 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
           {isTeacherOrAdmin ? "View Details →" : "Start Quiz →"}
         </Link>
       </div>
-    </div>
+    </GlassCard>
   );
 }

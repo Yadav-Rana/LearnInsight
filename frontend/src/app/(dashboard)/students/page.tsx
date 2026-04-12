@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Loader } from "@/components/ui";
-import { Avatar, EmptyState } from "@/components/dashboard";
+import { Avatar, EmptyState, GlassCard } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Student {
@@ -57,7 +57,7 @@ export default function StudentsPage() {
     try {
       setLoading(true);
       const response = await api.get("/users?role=student");
-      setStudents(response.data.users || []);
+      setStudents(response.data.data || response.data.users || []);
     } catch (err: unknown) {
       if (
         err &&
@@ -172,22 +172,10 @@ export default function StudentsPage() {
 }
 
 function StudentCard({ student }: { student: Student }) {
-  const [isHovered, setIsHovered] = useState(false);
   const enrolledCount = student.enrolledSubjects?.length || 0;
 
   return (
-    <motion.div
-      variants={itemVariants}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="rounded-2xl overflow-hidden transition-all duration-200"
-      style={{
-        background: "rgba(20, 20, 25, 0.6)",
-        backdropFilter: "blur(20px)",
-        border: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
-        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
-      }}
-    >
+    <GlassCard padding="p-0">
       <div className="p-6">
         <div className="flex items-center gap-4">
           <Avatar name={student.name} avatar={student.avatar} size="lg" />
@@ -235,6 +223,6 @@ function StudentCard({ student }: { student: Student }) {
           View Details →
         </Link>
       </div>
-    </motion.div>
+    </GlassCard>
   );
 }

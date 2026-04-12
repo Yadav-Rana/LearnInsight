@@ -5,3 +5,4 @@ export { default as WelcomeBanner } from "./WelcomeBanner";
 export { default as ContinueLearning } from "./ContinueLearning";
 export { default as EmptyState } from "./EmptyState";
 export { default as ChartCard } from "./ChartCard";
+export { default as GlassCard } from "./GlassCard";
