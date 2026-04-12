@@ -70,6 +70,7 @@ export default function DashboardPage() {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [studentCount, setStudentCount] = useState(0);
 
   const role = user?.role;
   const isStudent = role === "student";
@@ -81,9 +82,10 @@ export default function DashboardPage() {
     const studentRole = role === "student";
     const teacherRole = role === "teacher" || role === "admin";
 
+    const attemptLimit = teacherRole ? 50 : 10;
     const fetches: Promise<unknown>[] = [
       api.get("/progress").catch(() => ({ data: { data: [] } })),
-      api.get("/attempts?limit=10").catch(() => ({ data: { data: [] } })),
+      api.get(`/attempts?limit=${attemptLimit}`).catch(() => ({ data: { data: [] } })),
     ];
 
     if (studentRole) {
@@ -92,6 +94,7 @@ export default function DashboardPage() {
     if (teacherRole) {
       fetches.push(api.get("/quizzes").catch(() => ({ data: { data: [] } })));
       fetches.push(api.get("/subjects").catch(() => ({ data: { data: [] } })));
+      fetches.push(api.get("/users?role=student").catch(() => ({ data: { data: [], users: [] } })));
     }
 
     Promise.all(fetches).then((results) => {
@@ -110,6 +113,11 @@ export default function DashboardPage() {
         if (results[3]) {
           const subjectData = (results[3] as { data: { data: Subject[] } }).data?.data || [];
           setSubjects(subjectData);
+        }
+        if (results[4]) {
+          const studentsRes = results[4] as { data: { data?: unknown[]; users?: unknown[]; total?: number; count?: number } };
+          const count = studentsRes.data?.total || studentsRes.data?.data?.length || studentsRes.data?.users?.length || 0;
+          setStudentCount(count);
         }
       }
 
@@ -460,13 +468,31 @@ export default function DashboardPage() {
   function TeacherDashboard() {
     let sectionIdx = 0;
 
-    const distributionData = [
-      { range: "0-20%", count: 0 },
-      { range: "20-40%", count: 0 },
-      { range: "40-60%", count: 0 },
-      { range: "60-80%", count: 0 },
-      { range: "80-100%", count: 0 },
-    ];
+    const classAverage = useMemo(() => {
+      if (attempts.length === 0) return "--";
+      const avg = attempts.reduce((sum, a) => sum + a.percentage, 0) / attempts.length;
+      return `${Math.round(avg)}%`;
+    }, [attempts]);
+
+    const todaySubmissions = useMemo(() => {
+      const today = new Date().toDateString();
+      return attempts.filter((a) => new Date(a.completedAt).toDateString() === today).length;
+    }, [attempts]);
+
+    const distributionData = useMemo(() => {
+      const buckets = [
+        { range: "0-20%", count: 0 },
+        { range: "20-40%", count: 0 },
+        { range: "40-60%", count: 0 },
+        { range: "60-80%", count: 0 },
+        { range: "80-100%", count: 0 },
+      ];
+      for (const a of attempts) {
+        const idx = Math.min(Math.floor(a.percentage / 20), 4);
+        buckets[idx].count++;
+      }
+      return buckets;
+    }, [attempts]);
 
     return (
       <div className="space-y-6">
@@ -478,7 +504,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsCard
               title="Total Students"
-              value={0}
+              value={studentCount}
               icon={<UsersIcon />}
               color="blue"
               index={0}
@@ -492,14 +518,14 @@ export default function DashboardPage() {
             />
             <StatsCard
               title="Class Average"
-              value="--"
+              value={classAverage}
               icon={<ChartIcon />}
               color="orange"
               index={2}
             />
             <StatsCard
               title="Submissions Today"
-              value={0}
+              value={todaySubmissions}
               icon={<InboxIcon />}
               color="purple"
               index={3}
@@ -533,6 +559,7 @@ export default function DashboardPage() {
                   contentStyle={tooltipStyle}
                   labelStyle={{ color: "var(--text-primary)" }}
                   itemStyle={{ color: "#F97316" }}
+                  cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
                 />
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                   {distributionData.map((_, i) => (

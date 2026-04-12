@@ -136,7 +136,11 @@ const updateProgressAfterAttempt = async (userId, subjectId, attemptId) => {
 const getMyAttempts = asyncHandler(async (req, res, next) => {
   const { quizId, page = 1, limit = 10 } = req.query;
 
-  const query = { user: req.user.id };
+  const query = {};
+  // Teachers/admins see all attempts; students see only their own
+  if (req.user.role === "student") {
+    query.user = req.user.id;
+  }
   if (quizId) query.quiz = quizId;
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
