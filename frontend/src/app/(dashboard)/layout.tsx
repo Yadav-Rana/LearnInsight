@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import { Preloader } from "@/components/ui";
+import { Avatar } from "@/components/dashboard";
 
 interface NavItem {
   label: string;
@@ -216,17 +217,7 @@ export default function DashboardLayout({
               }}
             >
               <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 100%)",
-                    border: "1px solid rgba(59, 130, 246, 0.3)",
-                  }}
-                >
-                  <span className="text-blue-400 font-semibold">
-                    {user?.name?.charAt(0).toUpperCase() || "U"}
-                  </span>
-                </div>
+                <Avatar name={user?.name || "User"} avatar={user?.avatar} size="md" />
                 <div className="flex-1 min-w-0">
                   <p
                     className="text-sm font-medium text-white truncate"
@@ -295,16 +286,8 @@ export default function DashboardLayout({
                 Welcome back,{" "}
                 <span className="font-medium text-white">{user?.name}</span>
               </span>
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center lg:hidden"
-                style={{
-                  background: "linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.1) 100%)",
-                  border: "1px solid rgba(59, 130, 246, 0.3)",
-                }}
-              >
-                <span className="text-blue-400 font-semibold text-sm">
-                  {user?.name?.charAt(0).toUpperCase() || "U"}
-                </span>
+              <div className="lg:hidden">
+                <Avatar name={user?.name || "User"} avatar={user?.avatar} size="md" />
               </div>
             </div>
           </header>

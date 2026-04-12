@@ -71,7 +71,7 @@ const getUser = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin
  */
 const updateUser = asyncHandler(async (req, res, next) => {
-  const { name, email, role, isActive } = req.body;
+  const { name, email, role, isActive, avatar } = req.body;
 
   const user = await User.findById(req.params.id);
 
@@ -92,6 +92,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
   if (email) user.email = email;
   if (role) user.role = role;
   if (isActive !== undefined) user.isActive = isActive;
+  if (avatar !== undefined) user.avatar = avatar;
 
   await user.save();
 
@@ -104,6 +105,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
       email: user.email,
       role: user.role,
       isActive: user.isActive,
+      avatar: user.avatar,
     },
   });
 });
