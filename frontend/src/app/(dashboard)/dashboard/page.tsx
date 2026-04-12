@@ -71,21 +71,25 @@ export default function DashboardPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
 
-  const isStudent = user?.role === "student";
-  const isTeacher = user?.role === "teacher" || user?.role === "admin";
+  const role = user?.role;
+  const isStudent = role === "student";
+  const isTeacher = role === "teacher" || role === "admin";
 
   useEffect(() => {
-    if (!user) return;
+    if (!role) return;
+
+    const studentRole = role === "student";
+    const teacherRole = role === "teacher" || role === "admin";
 
     const fetches: Promise<unknown>[] = [
       api.get("/progress").catch(() => ({ data: { data: [] } })),
       api.get("/attempts?limit=10").catch(() => ({ data: { data: [] } })),
     ];
 
-    if (isStudent) {
+    if (studentRole) {
       fetches.push(api.get("/insights").catch(() => ({ data: { data: [] } })));
     }
-    if (isTeacher) {
+    if (teacherRole) {
       fetches.push(api.get("/quizzes").catch(() => ({ data: { data: [] } })));
       fetches.push(api.get("/subjects").catch(() => ({ data: { data: [] } })));
     }
@@ -96,11 +100,11 @@ export default function DashboardPage() {
       setProgress(progressData);
       setAttempts(attemptsData);
 
-      if (isStudent && results[2]) {
+      if (studentRole && results[2]) {
         const insightData = (results[2] as { data: { data: Insight[] } }).data?.data || [];
         setInsights(Array.isArray(insightData) ? insightData : [insightData]);
       }
-      if (isTeacher) {
+      if (teacherRole) {
         const quizData = (results[2] as { data: { data: Quiz[] } }).data?.data || [];
         setQuizzes(quizData);
         if (results[3]) {
@@ -111,7 +115,7 @@ export default function DashboardPage() {
 
       setLoading(false);
     });
-  }, [user, isStudent, isTeacher]);
+  }, [role]);
 
   const averageScore = useMemo(() => {
     if (attempts.length === 0) return "--";

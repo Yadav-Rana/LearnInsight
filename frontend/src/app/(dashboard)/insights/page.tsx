@@ -118,7 +118,7 @@ export default function InsightsPage() {
           onClick={generateNewInsights}
           disabled={generating}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)", color: "white", fontFamily: "var(--font-body)" }}
+          style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)", color: "white", fontFamily: "var(--font-body)" }}
         >
           {generating ? (
             <>
@@ -140,33 +140,16 @@ export default function InsightsPage() {
 
       {/* No Insights Yet */}
       {!insight && !error && (
-        <motion.div variants={itemVariants} className="space-y-4">
+        <motion.div variants={itemVariants}>
           <EmptyState
             icon={
-              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#F97316" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
             }
             title="No Insights Yet"
             description="Complete some quizzes first, then our AI will analyze your performance and provide personalized recommendations."
             actionLabel="Take a Quiz"
             actionHref="/quizzes"
           />
-          <div className="flex justify-center">
-            <button
-              onClick={generateNewInsights}
-              disabled={generating}
-              className="px-4 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)", color: "white", fontFamily: "var(--font-body)" }}
-            >
-              {generating ? (
-                <>
-                  <Loader size="xs" variant="dots" />
-                  Generating...
-                </>
-              ) : (
-                "Generate Insights Anyway"
-              )}
-            </button>
-          </div>
         </motion.div>
       )}
 
@@ -180,11 +163,11 @@ export default function InsightsPage() {
             <motion.div
               variants={itemVariants}
               className="rounded-2xl p-6"
-              style={{ background: "linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)", border: "1px solid rgba(168, 85, 247, 0.2)" }}
+              style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
             >
               <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                <div className="p-3 rounded-xl" style={{ background: "rgba(249, 115, 22, 0.12)", border: "1px solid rgba(249, 115, 22, 0.25)" }}>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#F97316" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>AI Summary</h3>
@@ -220,7 +203,7 @@ export default function InsightsPage() {
                       key={index}
                       variants={itemVariants}
                       className="p-4 rounded-xl"
-                      style={{ background: "rgba(249, 115, 22, 0.1)", border: "1px solid rgba(249, 115, 22, 0.2)" }}
+                      style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>{area.subject?.name || "Unknown Subject"}</h4>
@@ -300,7 +283,7 @@ export default function InsightsPage() {
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, y: -2 }}
                 className="p-4 rounded-xl transition-all duration-200 cursor-default"
-                style={{ background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.2)" }}
+                style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
               >
                 <h4 className="font-medium mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>Consistent Practice</h4>
                 <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Take at least one quiz daily to maintain your learning streak.</p>
@@ -309,7 +292,7 @@ export default function InsightsPage() {
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, y: -2 }}
                 className="p-4 rounded-xl transition-all duration-200 cursor-default"
-                style={{ background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)" }}
+                style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
               >
                 <h4 className="font-medium mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>Review Mistakes</h4>
                 <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Focus on questions you got wrong to strengthen weak areas.</p>
@@ -318,7 +301,7 @@ export default function InsightsPage() {
                 variants={itemVariants}
                 whileHover={{ scale: 1.02, y: -2 }}
                 className="p-4 rounded-xl transition-all duration-200 cursor-default"
-                style={{ background: "rgba(168, 85, 247, 0.1)", border: "1px solid rgba(168, 85, 247, 0.2)" }}
+                style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
               >
                 <h4 className="font-medium mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>Mix Topics</h4>
                 <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Alternate between subjects to improve retention and connections.</p>

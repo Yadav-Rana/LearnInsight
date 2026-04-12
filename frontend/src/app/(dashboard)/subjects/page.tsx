@@ -371,7 +371,7 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
     setError("");
     try {
       setLoading(true);
-      await api.post("/subjects", { name: formData.name, description: formData.description, parent: formData.parent || null });
+      await api.post("/subjects", { name: formData.name, description: formData.description, ...(formData.parent ? { parent: formData.parent } : {}) });
       onSuccess();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create subject";

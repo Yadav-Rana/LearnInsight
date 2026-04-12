@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 const config = require("../config");
 const { AppError } = require("./errorHandler");
+const { User } = require("../models");
 
 const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -24,10 +25,13 @@ const protect = asyncHandler(async (req, res, next) => {
     // Verify token
     const decoded = jwt.verify(token, config.jwtSecret);
 
-    // Add user info to request
-    // You'll need to import your User model and find the user
-    // req.user = await User.findById(decoded.id).select("-password");
-    req.user = decoded;
+    // Fetch full user from DB so role and other fields are available
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) {
+      return next(new AppError("User no longer exists", 401));
+    }
+
+    req.user = user;
 
     next();
   } catch (error) {
