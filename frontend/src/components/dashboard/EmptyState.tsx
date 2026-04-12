@@ -10,9 +10,10 @@ interface EmptyStateProps {
   description: string;
   actionLabel?: string;
   actionHref?: string;
+  onAction?: () => void;
 }
 
-export default function EmptyState({ icon, title, description, actionLabel, actionHref }: EmptyStateProps) {
+export default function EmptyState({ icon, title, description, actionLabel, actionHref, onAction }: EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -55,6 +56,19 @@ export default function EmptyState({ icon, title, description, actionLabel, acti
         >
           {actionLabel}
         </Link>
+      )}
+      {actionLabel && onAction && !actionHref && (
+        <button
+          onClick={onAction}
+          className="inline-block text-sm px-5 py-2 rounded-lg font-medium transition-colors"
+          style={{
+            background: "#F97316",
+            color: "#000",
+            fontFamily: "var(--font-body)",
+          }}
+        >
+          {actionLabel}
+        </button>
       )}
     </motion.div>
   );
