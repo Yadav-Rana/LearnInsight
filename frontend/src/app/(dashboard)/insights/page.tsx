@@ -170,7 +170,7 @@ export default function InsightsPage() {
           <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Personalized recommendations based on your learning patterns</p>
         </div>
         <div className="flex gap-2">
-          {history.length > 1 && (
+          {history.length > 0 && (
             <button
               onClick={() => setShowHistory(!showHistory)}
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-medium transition-all duration-200"

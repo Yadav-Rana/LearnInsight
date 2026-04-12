@@ -203,58 +203,37 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
   return (
     <GlassCard padding="p-0">
       <div className="p-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wide" style={{ background: difficulty.bg, border: `1px solid ${difficulty.border}`, color: difficulty.color }}>
-              {quiz.difficulty}
+        {/* Badges — always same row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wide" style={{ background: difficulty.bg, border: `1px solid ${difficulty.border}`, color: difficulty.color }}>
+            {quiz.difficulty}
+          </span>
+          {quiz.subject?.name && (
+            <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.25)", color: "#3B82F6" }}>
+              {quiz.subject.name}
             </span>
-            {quiz.subject?.name && (
-              <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.25)", color: "#3B82F6" }}>
-                {quiz.subject.name}
-              </span>
-            )}
-            {quiz.isAIGenerated && (
-              <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}>
-                AI Generated
-              </span>
-            )}
-            {isTeacherOrAdmin && !quiz.isPublished && (
-              <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-muted)" }}>
-                Draft
-              </span>
-            )}
-          </div>
-          {isTeacherOrAdmin && (
-            <div className="flex gap-1">
-              <button onClick={onTogglePublish} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: quiz.isPublished ? "#22C55E" : "rgba(255, 255, 255, 0.4)" }} title={quiz.isPublished ? "Unpublish" : "Publish"}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </button>
-              <Link href={`/quizzes/${quiz._id}/edit`} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                </svg>
-              </Link>
-              <button onClick={onDelete} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
+          )}
+          {quiz.isAIGenerated && (
+            <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}>
+              AI
+            </span>
+          )}
+          {isTeacherOrAdmin && !quiz.isPublished && (
+            <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-muted)" }}>
+              Draft
+            </span>
           )}
         </div>
 
-        <h3 className="mt-4 text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>{quiz.title}</h3>
-        <p className="mt-1 text-sm line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>{quiz.description || "No description available"}</p>
+        <h3 className="mt-3 text-lg font-semibold line-clamp-1" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>{quiz.title}</h3>
+        <p className="mt-1 text-sm line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)", minHeight: "2.5rem" }}>{quiz.description || "No description available"}</p>
 
-        <div className="mt-4 flex items-center gap-4 text-sm" style={{ color: "var(--text-muted)" }}>
+        <div className="mt-3 flex items-center gap-4 text-sm" style={{ color: "var(--text-muted)" }}>
           <span className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            {quiz.questions?.length || 0} questions
+            {quiz.questions?.length || 0} Qs
           </span>
           {quiz.timeLimit && (
             <span className="flex items-center gap-1">
@@ -267,10 +246,31 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
         </div>
       </div>
 
-      <div className="px-6 py-3" style={{ background: "rgba(255, 255, 255, 0.02)", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+      {/* Footer — actions + link */}
+      <div className="px-6 py-3 flex items-center justify-between" style={{ background: "rgba(255, 255, 255, 0.02)", borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
         <Link href={`/quizzes/${quiz._id}`} className="text-sm font-medium" style={{ color: "#F97316" }}>
           {isTeacherOrAdmin ? "View Details →" : "Start Quiz →"}
         </Link>
+        {isTeacherOrAdmin && (
+          <div className="flex gap-1">
+            <button onClick={onTogglePublish} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: quiz.isPublished ? "#22C55E" : "rgba(255, 255, 255, 0.4)" }} title={quiz.isPublished ? "Unpublish" : "Publish"}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+            <Link href={`/quizzes/${quiz._id}/edit`} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </Link>
+            <button onClick={onDelete} className="p-1.5 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </GlassCard>
   );
