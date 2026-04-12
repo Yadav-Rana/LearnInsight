@@ -109,7 +109,7 @@ export default function QuizDetailPage() {
       const startTime = quiz.timeLimit ? quiz.timeLimit * 60 : 0;
       const timeTaken = timeLeft !== null ? startTime - timeLeft : 0;
 
-      const response = await api.post("/quiz-attempts", {
+      const response = await api.post("/attempts", {
         quiz: quiz._id,
         answers: answers.map((a) => (a === null ? -1 : a)),
         timeTaken,

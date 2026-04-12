@@ -46,7 +46,7 @@ export default function ProgressPage() {
       setLoading(true);
       const [progressRes, attemptsRes] = await Promise.all([
         api.get("/progress"),
-        api.get("/quiz-attempts?limit=10"),
+        api.get("/attempts?limit=10"),
       ]);
 
       const progressData = progressRes.data.data || [];
