@@ -69,8 +69,8 @@ export default function InsightsPage() {
       const response = await api.post("/insights/generate");
       setInsight(response.data.data);
     } catch (err) {
-      setError("Failed to generate insights. Please try again later.");
-      console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to generate insights. Please try again later.";
+      setError(message);
     } finally {
       setGenerating(false);
     }
