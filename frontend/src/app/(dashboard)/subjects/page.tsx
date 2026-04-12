@@ -50,14 +50,6 @@ const modalContentVariants = {
   exit: { opacity: 0, scale: 0.95, y: 10, transition: { duration: 0.15 } },
 };
 
-const accentColors = [
-  "#3B82F6",
-  "#22C55E",
-  "#A855F7",
-  "#F97316",
-  "#EC4899",
-];
-
 export default function SubjectsPage() {
   const { user } = useAuth();
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -254,14 +246,13 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCard
   ];
   const colorIndex = subject.name.charCodeAt(0) % iconColors.length;
   const colors = iconColors[colorIndex];
-  const accentColor = accentColors[colorIndex];
 
   const resourceCount = subject.resources?.length || 0;
   const maxResources = 10;
   const progressPercent = Math.min((resourceCount / maxResources) * 100, 100);
 
   return (
-    <GlassCard accentColor={accentColor} padding="p-0">
+    <GlassCard padding="p-0">
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div
@@ -322,7 +313,7 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCard
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${progressPercent}%`,
-                background: accentColor,
+                background: colors.icon,
                 opacity: 0.7,
               }}
             />
