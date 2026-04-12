@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
+import { Preloader } from "@/components/ui";
 
 interface NavItem {
   label: string;
@@ -92,6 +93,15 @@ export default function DashboardLayout({
   const router = useRouter();
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showReveal, setShowReveal] = useState(false);
+  const hasShownReveal = useRef(false);
+
+  useEffect(() => {
+    if (!hasShownReveal.current) {
+      hasShownReveal.current = true;
+      setShowReveal(true);
+    }
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -104,6 +114,7 @@ export default function DashboardLayout({
 
   return (
     <ProtectedRoute>
+      {showReveal && <Preloader duration={2500} onComplete={() => setShowReveal(false)} />}
       <div
         className="min-h-screen"
         style={{
