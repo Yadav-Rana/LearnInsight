@@ -2,8 +2,20 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { Loader } from "@/components/ui";
+import { EmptyState } from "@/components/dashboard";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
 
 interface WeakArea {
   subject: { _id: string; name: string };
@@ -90,9 +102,14 @@ export default function InsightsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="space-y-6"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>AI Insights</h1>
           <p style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>Personalized recommendations based on your learning patterns</p>
@@ -115,37 +132,56 @@ export default function InsightsPage() {
             </>
           )}
         </button>
-      </div>
+      </motion.div>
 
       {error && (
-        <div className="p-4 rounded-xl" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#EF4444" }}>{error}</div>
+        <motion.div variants={itemVariants} className="p-4 rounded-xl" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#EF4444" }}>{error}</motion.div>
       )}
 
       {/* No Insights Yet */}
       {!insight && !error && (
-        <div className="text-center py-16 rounded-2xl" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, rgba(168, 85, 247, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%)", border: "1px solid rgba(168, 85, 247, 0.3)" }}>
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+        <motion.div variants={itemVariants} className="space-y-4">
+          <EmptyState
+            icon={
+              <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+            }
+            title="No Insights Yet"
+            description="Complete some quizzes first, then our AI will analyze your performance and provide personalized recommendations."
+            actionLabel="Take a Quiz"
+            actionHref="/quizzes"
+          />
+          <div className="flex justify-center">
+            <button
+              onClick={generateNewInsights}
+              disabled={generating}
+              className="px-4 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)", color: "white", fontFamily: "var(--font-body)" }}
+            >
+              {generating ? (
+                <>
+                  <Loader size="xs" variant="dots" />
+                  Generating...
+                </>
+              ) : (
+                "Generate Insights Anyway"
+              )}
+            </button>
           </div>
-          <h3 className="text-xl font-semibold mb-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>No Insights Yet</h3>
-          <p className="max-w-md mx-auto mb-6" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
-            Complete some quizzes first, then our AI will analyze your performance and provide personalized recommendations.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link href="/quizzes" className="px-4 py-2.5 rounded-xl font-medium transition-colors" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-secondary)" }}>Take a Quiz</Link>
-            <button onClick={generateNewInsights} disabled={generating} className="px-4 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-50" style={{ background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)", color: "white" }}>Generate Insights Anyway</button>
-          </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Insights Content */}
       {insight && (
         <>
-          <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Last updated: {formatDate(insight.generatedAt)}</p>
+          <motion.p variants={itemVariants} className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Last updated: {formatDate(insight.generatedAt)}</motion.p>
 
           {/* AI Summary */}
           {insight.aiSummary && (
-            <div className="rounded-2xl p-6" style={{ background: "linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)", border: "1px solid rgba(168, 85, 247, 0.2)" }}>
+            <motion.div
+              variants={itemVariants}
+              className="rounded-2xl p-6"
+              style={{ background: "linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%)", border: "1px solid rgba(168, 85, 247, 0.2)" }}
+            >
               <div className="flex items-start gap-4">
                 <div className="p-3 rounded-xl" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)" }}>
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#A855F7" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
@@ -155,10 +191,10 @@ export default function InsightsPage() {
                   <p style={{ fontFamily: "var(--font-body)", color: "var(--text-secondary)", lineHeight: 1.7 }}>{insight.aiSummary}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <motion.div variants={itemVariants} className="grid md:grid-cols-2 gap-6">
             {/* Weak Areas */}
             <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
               <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
@@ -173,18 +209,28 @@ export default function InsightsPage() {
                   <p style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Great job! No weak areas detected.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <motion.div
+                  className="space-y-4"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
                   {insight.weakAreas.map((area, index) => (
-                    <div key={index} className="p-4 rounded-xl" style={{ background: "rgba(249, 115, 22, 0.1)", border: "1px solid rgba(249, 115, 22, 0.2)" }}>
+                    <motion.div
+                      key={index}
+                      variants={itemVariants}
+                      className="p-4 rounded-xl"
+                      style={{ background: "rgba(249, 115, 22, 0.1)", border: "1px solid rgba(249, 115, 22, 0.2)" }}
+                    >
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>{area.subject?.name || "Unknown Subject"}</h4>
                         <Link href={`/subjects/${area.subject?._id}`} className="text-xs" style={{ color: "#F97316" }}>Study Now</Link>
                       </div>
                       <p className="text-sm mb-2" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>{area.reason}</p>
                       {area.suggestedAction && <p className="text-sm font-medium" style={{ color: "#F97316" }}>Suggestion: {area.suggestedAction}</p>}
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
             </div>
 
@@ -200,9 +246,25 @@ export default function InsightsPage() {
                   <p className="text-sm mt-1" style={{ color: "rgba(255, 255, 255, 0.4)" }}>Complete more quizzes to get personalized suggestions.</p>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <motion.div
+                  className="space-y-3"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
                   {insight.recommendations.map((rec, index) => (
-                    <a key={rec._id || index} href={rec.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group" style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+                    <motion.a
+                      key={rec._id || index}
+                      variants={itemVariants}
+                      whileHover={{ scale: 1.01 }}
+                      href={rec.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group hover:bg-white/5"
+                      style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.12)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(255, 255, 255, 0.06)"; }}
+                    >
                       <div className="flex-shrink-0">{getTypeIcon(rec.type)}</div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>{rec.title}</p>
@@ -211,36 +273,60 @@ export default function InsightsPage() {
                       <div className="flex-shrink-0">
                         <span className="text-xs px-2 py-1 rounded-full" style={{ background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.3)", color: "#3B82F6" }}>{rec.relevance}% match</span>
                       </div>
-                    </a>
+                    </motion.a>
                   ))}
-                </div>
+                </motion.div>
               )}
             </div>
-          </div>
+          </motion.div>
 
           {/* Learning Tips */}
-          <div className="rounded-2xl p-6" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+          <motion.div
+            variants={itemVariants}
+            className="rounded-2xl p-6"
+            style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
+          >
             <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "#22C55E" }}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
               Learning Tips
             </h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl" style={{ background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.2)" }}>
+            <motion.div
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <motion.div
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, y: -2 }}
+                className="p-4 rounded-xl transition-all duration-200 cursor-default"
+                style={{ background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.2)" }}
+              >
                 <h4 className="font-medium mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>Consistent Practice</h4>
                 <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Take at least one quiz daily to maintain your learning streak.</p>
-              </div>
-              <div className="p-4 rounded-xl" style={{ background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)" }}>
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, y: -2 }}
+                className="p-4 rounded-xl transition-all duration-200 cursor-default"
+                style={{ background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.2)" }}
+              >
                 <h4 className="font-medium mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>Review Mistakes</h4>
                 <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Focus on questions you got wrong to strengthen weak areas.</p>
-              </div>
-              <div className="p-4 rounded-xl" style={{ background: "rgba(168, 85, 247, 0.1)", border: "1px solid rgba(168, 85, 247, 0.2)" }}>
+              </motion.div>
+              <motion.div
+                variants={itemVariants}
+                whileHover={{ scale: 1.02, y: -2 }}
+                className="p-4 rounded-xl transition-all duration-200 cursor-default"
+                style={{ background: "rgba(168, 85, 247, 0.1)", border: "1px solid rgba(168, 85, 247, 0.2)" }}
+              >
                 <h4 className="font-medium mb-1" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>Mix Topics</h4>
                 <p className="text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Alternate between subjects to improve retention and connections.</p>
-              </div>
-            </div>
-          </div>
+              </motion.div>
+            </motion.div>
+          </motion.div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }
