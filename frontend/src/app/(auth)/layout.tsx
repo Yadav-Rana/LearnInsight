@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-import { GridBackground, GlowingOrbs, Particles } from "@/components/ui";
+import { GridBackground, GlowingOrbs, Loader, Particles } from "@/components/ui";
 
 export default function AuthLayout({
   children,
@@ -29,10 +29,7 @@ export default function AuthLayout({
         className="min-h-screen flex items-center justify-center"
         style={{ background: "var(--bg-primary)" }}
       >
-        <div
-          className="animate-spin rounded-full h-12 w-12 border-b-2"
-          style={{ borderColor: "#F97316" }}
-        />
+        <Loader size="md" variant="wave" />
       </div>
     );
   }

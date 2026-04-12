@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { Loader } from "@/components/ui";
 import api from "@/lib/api";
 
 interface Quiz {
@@ -77,10 +78,7 @@ export default function QuizzesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div
-          className="animate-spin rounded-full h-12 w-12 border-2"
-          style={{ borderColor: "rgba(249, 115, 22, 0.3)", borderTopColor: "#F97316" }}
-        />
+        <Loader size="md" variant="wave" />
       </div>
     );
   }

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
-import { Preloader } from "@/components/ui";
+import { Loader, Preloader } from "@/components/ui";
 import {
   Navbar,
   Hero,
@@ -76,13 +76,7 @@ export default function Home() {
         className="min-h-screen flex items-center justify-center"
         style={{ background: "var(--bg-primary)" }}
       >
-        <div
-          className="w-10 h-10 rounded-full border-2 animate-spin"
-          style={{
-            borderColor: "rgba(249, 115, 22, 0.2)",
-            borderTopColor: "#F97316",
-          }}
-        />
+        <Loader size="md" variant="wave" />
       </div>
     );
   }

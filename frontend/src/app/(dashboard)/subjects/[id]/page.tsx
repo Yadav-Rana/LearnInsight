@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
+import { Loader } from "@/components/ui";
 
 interface Resource {
   _id: string;
@@ -94,7 +95,7 @@ export default function SubjectDetailPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+        <Loader size="md" variant="wave" />
       </div>
     );
   }
