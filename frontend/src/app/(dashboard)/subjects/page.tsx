@@ -270,7 +270,9 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCard
       style={{
         background: "rgba(20, 20, 25, 0.6)",
         backdropFilter: "blur(20px)",
-        border: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
+        borderTop: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
+        borderRight: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
+        borderBottom: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
         borderLeft: `3px solid ${accentColor}`,
         transform: isHovered ? "translateY(-2px)" : "translateY(0)",
       }}
