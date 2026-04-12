@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
+import { EmptyState } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Quiz {
@@ -19,6 +21,16 @@ interface Quiz {
   createdBy: { _id: string; name: string };
   createdAt: string;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
 
 export default function QuizzesPage() {
   const { user } = useAuth();
@@ -120,14 +132,14 @@ export default function QuizzesPage() {
             placeholder="Search quizzes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 rounded-xl transition-all duration-200 focus:outline-none"
+            className="w-full pl-12 pr-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
             style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
           />
         </div>
         <select
           value={filterDifficulty}
           onChange={(e) => setFilterDifficulty(e.target.value)}
-          className="px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none"
+          className="px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-orange-500/30"
           style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
         >
           <option value="">All Difficulties</option>
@@ -146,23 +158,30 @@ export default function QuizzesPage() {
 
       {/* Quizzes List */}
       {filteredQuizzes.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-          <div className="w-16 h-16 mx-auto rounded-xl flex items-center justify-center mb-4" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.08)" }}>
+        <EmptyState
+          icon={
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "rgba(255, 255, 255, 0.3)" }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-          </div>
-          <h3 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>No quizzes found</h3>
-          <p className="mt-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
-            {isTeacherOrAdmin ? "Create your first quiz to get started." : "No quizzes available yet. Check back later!"}
-          </p>
-        </div>
+          }
+          title="No quizzes found"
+          description={isTeacherOrAdmin ? "Create your first quiz to get started." : "No quizzes available yet. Check back later!"}
+          actionLabel={isTeacherOrAdmin ? "Create Quiz" : undefined}
+          actionHref={isTeacherOrAdmin ? "/quizzes/create" : undefined}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {filteredQuizzes.map((quiz) => (
-            <QuizCard key={quiz._id} quiz={quiz} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={() => handleDelete(quiz._id)} onTogglePublish={() => handleTogglePublish(quiz._id)} />
+            <motion.div key={quiz._id} variants={itemVariants}>
+              <QuizCard quiz={quiz} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={() => handleDelete(quiz._id)} onTogglePublish={() => handleTogglePublish(quiz._id)} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -176,6 +195,8 @@ interface QuizCardProps {
 }
 
 function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   const difficultyStyles = {
     easy: { bg: "rgba(34, 197, 94, 0.15)", border: "rgba(34, 197, 94, 0.3)", color: "#22C55E" },
     medium: { bg: "rgba(234, 179, 8, 0.15)", border: "rgba(234, 179, 8, 0.3)", color: "#EAB308" },
@@ -184,13 +205,28 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
   const difficulty = difficultyStyles[quiz.difficulty];
 
   return (
-    <div className="rounded-2xl overflow-hidden transition-all duration-200 hover:translate-y-[-2px]" style={{ background: "rgba(20, 20, 25, 0.6)", backdropFilter: "blur(20px)", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
+    <div
+      className="rounded-2xl overflow-hidden transition-all duration-200"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        background: "rgba(20, 20, 25, 0.6)",
+        backdropFilter: "blur(20px)",
+        border: isHovered ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(255, 255, 255, 0.06)",
+        transform: isHovered ? "translateY(-2px)" : "translateY(0)",
+      }}
+    >
       <div className="p-6">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: difficulty.bg, border: `1px solid ${difficulty.border}`, color: difficulty.color }}>
+            <span className="px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wide" style={{ background: difficulty.bg, border: `1px solid ${difficulty.border}`, color: difficulty.color }}>
               {quiz.difficulty}
             </span>
+            {quiz.subject?.name && (
+              <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(59, 130, 246, 0.12)", border: "1px solid rgba(59, 130, 246, 0.25)", color: "#3B82F6" }}>
+                {quiz.subject.name}
+              </span>
+            )}
             {quiz.isAIGenerated && (
               <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}>
                 AI Generated
@@ -204,18 +240,18 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
           </div>
           {isTeacherOrAdmin && (
             <div className="flex gap-1">
-              <button onClick={onTogglePublish} className="p-2 rounded-lg transition-colors" style={{ color: quiz.isPublished ? "#22C55E" : "rgba(255, 255, 255, 0.4)" }} title={quiz.isPublished ? "Unpublish" : "Publish"}>
+              <button onClick={onTogglePublish} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: quiz.isPublished ? "#22C55E" : "rgba(255, 255, 255, 0.4)" }} title={quiz.isPublished ? "Unpublish" : "Publish"}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
               </button>
-              <Link href={`/quizzes/${quiz._id}/edit`} className="p-2 rounded-lg transition-colors" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+              <Link href={`/quizzes/${quiz._id}/edit`} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </Link>
-              <button onClick={onDelete} className="p-2 rounded-lg transition-colors" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+              <button onClick={onDelete} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -228,12 +264,6 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
         <p className="mt-1 text-sm line-clamp-2" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>{quiz.description || "No description available"}</p>
 
         <div className="mt-4 flex items-center gap-4 text-sm" style={{ color: "var(--text-muted)" }}>
-          <span className="flex items-center gap-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-            {quiz.subject?.name || "No subject"}
-          </span>
           <span className="flex items-center gap-1">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
