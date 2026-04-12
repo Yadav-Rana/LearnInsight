@@ -194,7 +194,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <StatsCard
               title="Enrolled Subjects"
-              value={user!.enrolledSubjects.length}
+              value={user?.enrolledSubjects?.length || 0}
               icon={<BookIcon />}
               color="blue"
               index={0}
