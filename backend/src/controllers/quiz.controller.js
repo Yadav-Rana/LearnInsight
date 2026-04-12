@@ -113,6 +113,7 @@ const createQuiz = asyncHandler(async (req, res, next) => {
     difficulty,
     timeLimit,
     passingScore,
+    showAnswers,
   } = req.body;
 
   // Verify subject exists
@@ -129,6 +130,7 @@ const createQuiz = asyncHandler(async (req, res, next) => {
     difficulty: difficulty || "medium",
     timeLimit: timeLimit || null,
     passingScore: passingScore || 60,
+    showAnswers: showAnswers !== undefined ? showAnswers : true,
     createdBy: req.user.id,
     isAIGenerated: false,
   });
@@ -185,6 +187,7 @@ const updateQuiz = asyncHandler(async (req, res, next) => {
   if (timeLimit !== undefined) quiz.timeLimit = timeLimit;
   if (passingScore !== undefined) quiz.passingScore = passingScore;
   if (isPublished !== undefined) quiz.isPublished = isPublished;
+  if (req.body.showAnswers !== undefined) quiz.showAnswers = req.body.showAnswers;
 
   await quiz.save();
 

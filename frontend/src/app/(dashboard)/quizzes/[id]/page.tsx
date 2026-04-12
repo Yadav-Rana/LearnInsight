@@ -25,9 +25,20 @@ interface Quiz {
   difficulty: "easy" | "medium" | "hard";
   timeLimit: number | null;
   passingScore: number;
+  showAnswers: boolean;
   questions: Question[];
   isPublished: boolean;
   createdBy: { _id: string; name: string };
+}
+
+interface AnswerReview {
+  questionId: string;
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  selectedAnswer: number;
+  isCorrect: boolean;
+  explanation: string;
 }
 
 const difficultyStyles = {
@@ -62,7 +73,10 @@ export default function QuizDetailPage() {
     percentage: number;
     timeTaken: number;
     passed: boolean;
+    showAnswers: boolean;
+    answerReview: AnswerReview[] | null;
   } | null>(null);
+  const [showingReview, setShowingReview] = useState(false);
 
   const isTeacherOrAdmin = user?.role === "teacher" || user?.role === "admin";
 
@@ -71,7 +85,7 @@ export default function QuizDetailPage() {
   }, [params.id]);
 
   useEffect(() => {
-    if (!isTaking || timeLeft === null || timeLeft <= 0) return;
+    if (!isTaking || timeLeft === null || timeLeft <= 0 || isTeacherOrAdmin) return;
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev === null || prev <= 1) {
@@ -82,7 +96,7 @@ export default function QuizDetailPage() {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [isTaking, timeLeft]);
+  }, [isTaking, timeLeft, isTeacherOrAdmin]);
 
   const fetchQuiz = async () => {
     try {
@@ -102,8 +116,14 @@ export default function QuizDetailPage() {
     setCurrentQuestion(0);
     setAnswers(new Array(quiz.questions.length).fill(null));
     setStartedAt(new Date().toISOString());
-    if (quiz.timeLimit) setTimeLeft(quiz.timeLimit * 60);
+    if (quiz.timeLimit && !isTeacherOrAdmin) setTimeLeft(quiz.timeLimit * 60);
     setResult(null);
+    setShowingReview(false);
+  };
+
+  const endPreview = () => {
+    setIsTaking(false);
+    setAnswers([]);
   };
 
   const handleAnswerSelect = (optionIndex: number) => {
@@ -113,7 +133,7 @@ export default function QuizDetailPage() {
   };
 
   const handleSubmit = useCallback(async () => {
-    if (!quiz || submitting) return;
+    if (!quiz || submitting || isTeacherOrAdmin) return;
     try {
       setSubmitting(true);
       const mappedAnswers = quiz.questions.map((q, i) => ({
@@ -130,6 +150,8 @@ export default function QuizDetailPage() {
         percentage: response.data.data.percentage,
         timeTaken: response.data.data.timeTaken,
         passed: response.data.data.passed,
+        showAnswers: response.data.data.showAnswers,
+        answerReview: response.data.data.answerReview,
       });
       setIsTaking(false);
     } catch {
@@ -137,7 +159,7 @@ export default function QuizDetailPage() {
     } finally {
       setSubmitting(false);
     }
-  }, [quiz, answers, startedAt, submitting]);
+  }, [quiz, answers, startedAt, submitting, isTeacherOrAdmin]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -169,6 +191,132 @@ export default function QuizDetailPage() {
   }
 
   const difficulty = difficultyStyles[quiz.difficulty];
+
+  // ─── Answer Review View ───
+  if (showingReview && result?.answerReview) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <motion.div {...sectionMotion(0)} className="flex items-center justify-between">
+          <h1 className="text-xl font-bold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
+            Answer Review — {quiz.title}
+          </h1>
+          <button
+            onClick={() => setShowingReview(false)}
+            className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+            style={{
+              background: "rgba(255, 255, 255, 0.05)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              color: "var(--text-primary)",
+              fontFamily: "var(--font-body)",
+            }}
+          >
+            Back to Results
+          </button>
+        </motion.div>
+
+        {result.answerReview.map((item, idx) => {
+          const wasSkipped = item.selectedAnswer === -1;
+          return (
+            <motion.div key={item.questionId} {...sectionMotion(idx + 1)}>
+              <GlassCard>
+                <div className="flex items-start gap-3 mb-4">
+                  <span
+                    className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                    style={{
+                      background: item.isCorrect ? "rgba(34, 197, 94, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                      border: `1px solid ${item.isCorrect ? "rgba(34, 197, 94, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
+                      color: item.isCorrect ? "#22C55E" : "#EF4444",
+                    }}
+                  >
+                    {idx + 1}
+                  </span>
+                  <h3 className="text-base font-medium" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
+                    {item.question}
+                  </h3>
+                </div>
+
+                <div className="space-y-2 ml-11">
+                  {item.options.map((option, optIdx) => {
+                    const isCorrect = optIdx === item.correctAnswer;
+                    const isSelected = optIdx === item.selectedAnswer;
+                    let bg = "rgba(255, 255, 255, 0.03)";
+                    let border = "1px solid rgba(255, 255, 255, 0.06)";
+                    let textColor = "var(--text-secondary)";
+
+                    if (isCorrect) {
+                      bg = "rgba(34, 197, 94, 0.1)";
+                      border = "1px solid rgba(34, 197, 94, 0.4)";
+                      textColor = "#22C55E";
+                    } else if (isSelected && !isCorrect) {
+                      bg = "rgba(239, 68, 68, 0.1)";
+                      border = "1px solid rgba(239, 68, 68, 0.4)";
+                      textColor = "#EF4444";
+                    }
+
+                    return (
+                      <div
+                        key={optIdx}
+                        className="flex items-center gap-3 p-3 rounded-xl"
+                        style={{ background: bg, border }}
+                      >
+                        <span
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0"
+                          style={{
+                            background: isCorrect
+                              ? "rgba(34, 197, 94, 0.2)"
+                              : isSelected && !isCorrect
+                              ? "rgba(239, 68, 68, 0.2)"
+                              : "rgba(255, 255, 255, 0.06)",
+                            color: isCorrect ? "#22C55E" : isSelected ? "#EF4444" : "var(--text-muted)",
+                          }}
+                        >
+                          {String.fromCharCode(65 + optIdx)}
+                        </span>
+                        <span className="flex-1 text-sm" style={{ color: textColor, fontFamily: "var(--font-body)" }}>
+                          {option}
+                        </span>
+                        {isCorrect && (
+                          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="#22C55E" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                        {isSelected && !isCorrect && (
+                          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="#EF4444" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {wasSkipped && (
+                  <p className="ml-11 mt-2 text-xs" style={{ color: "#EAB308", fontFamily: "var(--font-body)" }}>
+                    You skipped this question
+                  </p>
+                )}
+
+                {item.explanation && (
+                  <div
+                    className="ml-11 mt-3 p-3 rounded-xl text-sm"
+                    style={{
+                      background: "rgba(59, 130, 246, 0.08)",
+                      border: "1px solid rgba(59, 130, 246, 0.2)",
+                      color: "var(--text-secondary)",
+                      fontFamily: "var(--font-body)",
+                    }}
+                  >
+                    <span style={{ color: "#3B82F6", fontWeight: 600 }}>Explanation: </span>
+                    {item.explanation}
+                  </div>
+                )}
+              </GlassCard>
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  }
 
   // ─── Result View ───
   if (result) {
@@ -235,7 +383,21 @@ export default function QuizDetailPage() {
             </div>
 
             {/* Actions */}
-            <div className="mt-8 flex gap-4 justify-center">
+            <div className="mt-8 flex gap-4 justify-center flex-wrap">
+              {result.showAnswers && result.answerReview && (
+                <button
+                  onClick={() => setShowingReview(true)}
+                  className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200"
+                  style={{
+                    background: "rgba(59, 130, 246, 0.1)",
+                    border: "1px solid rgba(59, 130, 246, 0.3)",
+                    color: "#3B82F6",
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  Review Answers
+                </button>
+              )}
               <button
                 onClick={startQuiz}
                 className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200"
@@ -279,14 +441,24 @@ export default function QuizDetailPage() {
           <GlassCard padding="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
-                  {quiz.title}
-                </h1>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
+                    {quiz.title}
+                  </h1>
+                  {isTeacherOrAdmin && (
+                    <span
+                      className="px-2 py-0.5 text-xs font-medium rounded-full"
+                      style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}
+                    >
+                      Preview Mode
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
                   Question {currentQuestion + 1} of {quiz.questions.length}
                 </p>
               </div>
-              {timeLeft !== null && (
+              {!isTeacherOrAdmin && timeLeft !== null && (
                 <div
                   className="px-4 py-2 rounded-xl font-mono font-bold"
                   style={{
@@ -378,31 +550,76 @@ export default function QuizDetailPage() {
             {answeredCount} of {quiz.questions.length} answered
           </span>
 
-          {currentQuestion < quiz.questions.length - 1 ? (
-            <button
-              onClick={() => setCurrentQuestion((prev) => prev + 1)}
-              className="px-5 py-2.5 rounded-xl font-medium transition-all duration-200"
-              style={{
-                background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
-                color: "white",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              Next
-            </button>
+          {isTeacherOrAdmin ? (
+            /* Teacher: End Preview button on any question */
+            currentQuestion < quiz.questions.length - 1 ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={endPreview}
+                  className="px-5 py-2.5 rounded-xl font-medium transition-all duration-200"
+                  style={{
+                    background: "rgba(168, 85, 247, 0.1)",
+                    border: "1px solid rgba(168, 85, 247, 0.3)",
+                    color: "#A855F7",
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  End Preview
+                </button>
+                <button
+                  onClick={() => setCurrentQuestion((prev) => prev + 1)}
+                  className="px-5 py-2.5 rounded-xl font-medium transition-all duration-200"
+                  style={{
+                    background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
+                    color: "white",
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={endPreview}
+                className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200"
+                style={{
+                  background: "rgba(168, 85, 247, 0.1)",
+                  border: "1px solid rgba(168, 85, 247, 0.3)",
+                  color: "#A855F7",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                End Preview
+              </button>
+            )
           ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
-              style={{
-                background: "linear-gradient(135deg, #22C55E 0%, #16A34A 100%)",
-                color: "white",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              {submitting ? "Submitting..." : "Submit Quiz"}
-            </button>
+            /* Student: Next or Submit */
+            currentQuestion < quiz.questions.length - 1 ? (
+              <button
+                onClick={() => setCurrentQuestion((prev) => prev + 1)}
+                className="px-5 py-2.5 rounded-xl font-medium transition-all duration-200"
+                style={{
+                  background: "linear-gradient(135deg, #F97316 0%, #EA580C 100%)",
+                  color: "white",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                className="px-6 py-2.5 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(135deg, #22C55E 0%, #16A34A 100%)",
+                  color: "white",
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                {submitting ? "Submitting..." : "Submit Quiz"}
+              </button>
+            )
           )}
         </motion.div>
 
@@ -553,7 +770,9 @@ export default function QuizDetailPage() {
                 {isTeacherOrAdmin ? "Preview Quiz" : "Start Quiz"}
               </button>
               <p className="mt-2 text-sm" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
-                {quiz.timeLimit
+                {isTeacherOrAdmin
+                  ? "Preview mode — you can navigate through questions without submitting."
+                  : quiz.timeLimit
                   ? `You will have ${quiz.timeLimit} minutes to complete this quiz.`
                   : "Take your time, there is no time limit."}
               </p>

@@ -58,6 +58,11 @@ const createQuizValidator = [
     .optional()
     .isInt({ min: 0, max: 100 })
     .withMessage("Passing score must be between 0 and 100"),
+
+  body("showAnswers")
+    .optional()
+    .isBoolean()
+    .withMessage("showAnswers must be a boolean"),
 ];
 
 const updateQuizValidator = [
@@ -99,6 +104,11 @@ const updateQuizValidator = [
     .optional()
     .isBoolean()
     .withMessage("isPublished must be a boolean"),
+
+  body("showAnswers")
+    .optional()
+    .isBoolean()
+    .withMessage("showAnswers must be a boolean"),
 ];
 
 const quizIdValidator = [

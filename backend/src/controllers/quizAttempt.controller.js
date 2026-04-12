@@ -69,6 +69,25 @@ const submitAttempt = asyncHandler(async (req, res, next) => {
   // Populate for response
   await attempt.populate("quiz", "title subject");
 
+  // Build answer review if showAnswers is enabled
+  let answerReview = null;
+  if (quiz.showAnswers !== false) {
+    answerReview = quiz.questions.map((q) => {
+      const userAnswer = processedAnswers.find(
+        (a) => a.questionId.toString() === q._id.toString()
+      );
+      return {
+        questionId: q._id,
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        selectedAnswer: userAnswer ? userAnswer.selectedAnswer : -1,
+        isCorrect: userAnswer ? userAnswer.isCorrect : false,
+        explanation: q.explanation || "",
+      };
+    });
+  }
+
   res.status(201).json({
     success: true,
     message: passed ? "Congratulations! You passed!" : "Keep practicing!",
@@ -81,6 +100,8 @@ const submitAttempt = asyncHandler(async (req, res, next) => {
       timeTaken,
       correctAnswers: processedAnswers.filter((a) => a.isCorrect).length,
       totalQuestions: quiz.questions.length,
+      showAnswers: quiz.showAnswers !== false,
+      answerReview,
     },
   });
 });

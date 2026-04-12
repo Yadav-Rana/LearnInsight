@@ -87,6 +87,10 @@ const quizSchema = new mongoose.Schema(
       min: 0,
       max: 100,
     },
+    showAnswers: {
+      type: Boolean,
+      default: true,
+    },
     isPublished: {
       type: Boolean,
       default: false,
