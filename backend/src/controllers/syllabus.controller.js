@@ -212,7 +212,7 @@ const deleteSyllabus = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 const generateQuizFromSyllabus = asyncHandler(async (req, res, next) => {
-  const { difficulty = "medium", questionCount = 10 } = req.body;
+  const { difficulty = "medium", questionCount = 10 } = req.body || {};
 
   const syllabus = await Syllabus.findById(req.params.id);
 

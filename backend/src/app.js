@@ -27,9 +27,15 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Cookie parser
 app.use(cookieParser());
 
-// Logging middleware (only in development)
-if (config.nodeEnv === "development") {
-  app.use(morgan("dev"));
+// Request logging — always enabled in dev/preview. Uses a plain format
+// (no ANSI escapes) and writes to stderr so output isn't swallowed when
+// the process is run under `concurrently` or other multiplexers.
+if (config.nodeEnv !== "test") {
+  app.use(
+    morgan(":method :url :status :res[content-length] - :response-time ms", {
+      stream: { write: (msg) => process.stderr.write(msg) },
+    })
+  );
 }
 
 // API routes
