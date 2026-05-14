@@ -24,6 +24,8 @@ import {
   ContinueLearning,
   StatsCard,
   ChartCard,
+  ClassroomCard,
+  JoinTeacherBanner,
 } from "@/components/dashboard";
 import type { QuizAttempt, Progress, Insight, Quiz, Subject } from "@/types";
 
@@ -187,12 +189,19 @@ export default function DashboardPage() {
 
   function StudentDashboard() {
     let sectionIdx = 0;
+    const needsTeacher = !user?.teacher;
 
     return (
       <div className="space-y-6">
         <motion.div {...sectionMotion(sectionIdx++)}>
           <WelcomeBanner user={user!} />
         </motion.div>
+
+        {needsTeacher && (
+          <motion.div {...sectionMotion(sectionIdx++)}>
+            <JoinTeacherBanner />
+          </motion.div>
+        )}
 
         <motion.div {...sectionMotion(sectionIdx++)}>
           <ContinueLearning />
@@ -499,6 +508,12 @@ export default function DashboardPage() {
         <motion.div {...sectionMotion(sectionIdx++)}>
           <WelcomeBanner user={user!} />
         </motion.div>
+
+        {role === "teacher" && (
+          <motion.div {...sectionMotion(sectionIdx++)}>
+            <ClassroomCard studentCount={studentCount} />
+          </motion.div>
+        )}
 
         <motion.div {...sectionMotion(sectionIdx++)}>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
