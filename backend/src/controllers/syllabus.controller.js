@@ -209,7 +209,7 @@ const generateQuizFromSyllabus = asyncHandler(async (req, res, next) => {
     syllabus.processingError = error.message;
     await syllabus.save();
 
-    return next(new AppError("Failed to generate quiz: " + error.message, 500));
+    return next(new AppError("AI quiz generation failed: " + error.message, 502));
   }
 });
 
@@ -225,7 +225,12 @@ const extractTopics = asyncHandler(async (req, res, next) => {
     return next(new AppError("Syllabus not found", 404));
   }
 
-  const extractedTopics = await geminiService.extractTopics({ content: syllabus.content });
+  let extractedTopics;
+  try {
+    extractedTopics = await geminiService.extractTopics({ content: syllabus.content });
+  } catch (error) {
+    return next(new AppError("AI topic extraction failed: " + error.message, 502));
+  }
 
   syllabus.extractedTopics = extractedTopics;
   await syllabus.save();

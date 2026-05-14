@@ -89,14 +89,20 @@ const generateInsights = asyncHandler(async (req, res, next) => {
     subjectName: subjectNames[s.subject.toString()],
   }));
 
-  const [aiSummary, recommendations] = await Promise.all([
-    geminiService.generateInsightSummary({
-      overallStats,
-      weakAreas: weakAreasForAI,
-      strengths: strengthsForAI,
-    }),
-    buildRecommendations(weakAreas, weakAreasForAI),
-  ]);
+  let aiSummary;
+  let recommendations;
+  try {
+    [aiSummary, recommendations] = await Promise.all([
+      geminiService.generateInsightSummary({
+        overallStats,
+        weakAreas: weakAreasForAI,
+        strengths: strengthsForAI,
+      }),
+      buildRecommendations(weakAreas, weakAreasForAI),
+    ]);
+  } catch (error) {
+    return next(new AppError("AI insight generation failed: " + error.message, 502));
+  }
 
   // Create insight
   const insight = await Insight.create({
