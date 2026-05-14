@@ -28,6 +28,7 @@ interface Quiz {
   showAnswers: boolean;
   questions: Question[];
   isPublished: boolean;
+  isAIGenerated: boolean;
   createdBy: { _id: string; name: string };
 }
 
@@ -701,6 +702,14 @@ export default function QuizDetailPage() {
                     style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-muted)" }}
                   >
                     Draft
+                  </span>
+                )}
+                {quiz.isAIGenerated && (
+                  <span
+                    className="px-2.5 py-1 text-xs font-medium rounded-full"
+                    style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}
+                  >
+                    AI Generated
                   </span>
                 )}
               </div>

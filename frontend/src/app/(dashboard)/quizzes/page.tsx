@@ -215,7 +215,7 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
           )}
           {quiz.isAIGenerated && (
             <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}>
-              AI
+              AI Generated
             </span>
           )}
           {isTeacherOrAdmin && !quiz.isPublished && (
