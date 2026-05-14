@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Loader } from "@/components/ui";
+import { Loader, SlidingPanel } from "@/components/ui";
 import { GlassCard, EmptyState } from "@/components/dashboard";
 import api from "@/lib/api";
 
@@ -55,7 +55,7 @@ export default function SyllabusPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showUpload, setShowUpload] = useState(false);
-  const [expandedTopics, setExpandedTopics] = useState<string | null>(null);
+  const [topicsPanelId, setTopicsPanelId] = useState<string | null>(null);
   const [generatingQuiz, setGeneratingQuiz] = useState<string | null>(null);
   const [extractingTopics, setExtractingTopics] = useState<string | null>(null);
 
@@ -90,7 +90,7 @@ export default function SyllabusPage() {
       setExtractingTopics(id);
       await api.post(`/syllabus/${id}/extract-topics`);
       await fetchSyllabuses();
-      setExpandedTopics(id);
+      setTopicsPanelId(id);
     } catch {
       alert("Failed to extract topics");
     } finally {
@@ -228,56 +228,22 @@ export default function SyllabusPage() {
                     )}
                   </div>
 
-                  {/* Expanded Topics */}
-                  <AnimatePresence>
-                    {expandedTopics === syllabus._id && syllabus.extractedTopics?.length > 0 && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="mt-4 space-y-2 overflow-hidden"
-                      >
-                        {syllabus.extractedTopics.map((t, i) => (
-                          <div
-                            key={i}
-                            className="p-3 rounded-xl"
-                            style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
-                          >
-                            <p className="text-sm font-medium" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>
-                              {t.topic}
-                            </p>
-                            {t.subtopics?.length > 0 && (
-                              <ul className="mt-1.5 space-y-1">
-                                {t.subtopics.map((st, si) => (
-                                  <li key={si} className="text-xs flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
-                                    <span style={{ color: "#F97316" }}>-</span> {st}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
                   {/* Actions */}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => setExpandedTopics(expandedTopics === syllabus._id ? null : syllabus._id)}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.05)",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        color: "var(--text-secondary)",
-                        fontFamily: "var(--font-body)",
-                      }}
-                    >
-                      {syllabus.extractedTopics?.length > 0
-                        ? expandedTopics === syllabus._id ? "Hide Topics" : "View Topics"
-                        : extractingTopics === syllabus._id ? "Extracting..." : "Extract Topics"}
-                    </button>
-                    {syllabus.extractedTopics?.length === 0 && expandedTopics !== syllabus._id && (
+                    {syllabus.extractedTopics?.length > 0 ? (
+                      <button
+                        onClick={() => setTopicsPanelId(syllabus._id)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.05)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          color: "var(--text-secondary)",
+                          fontFamily: "var(--font-body)",
+                        }}
+                      >
+                        View Topics
+                      </button>
+                    ) : (
                       <button
                         onClick={() => handleExtractTopics(syllabus._id)}
                         disabled={extractingTopics === syllabus._id}
@@ -337,7 +303,97 @@ export default function SyllabusPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Topics sliding panel */}
+      <TopicsPanel
+        syllabus={
+          topicsPanelId ? syllabuses.find((s) => s._id === topicsPanelId) || null : null
+        }
+        onClose={() => setTopicsPanelId(null)}
+      />
     </div>
+  );
+}
+
+function TopicsPanel({
+  syllabus,
+  onClose,
+}: {
+  syllabus: Syllabus | null;
+  onClose: () => void;
+}) {
+  return (
+    <SlidingPanel
+      open={!!syllabus}
+      onClose={onClose}
+      side="left"
+      width={460}
+      title={syllabus ? `Topics: ${syllabus.title}` : ""}
+      subtitle={
+        syllabus
+          ? `${syllabus.extractedTopics?.length || 0} topics extracted from ${syllabus.subject?.name || "syllabus"}`
+          : ""
+      }
+    >
+      {syllabus && syllabus.extractedTopics?.length > 0 ? (
+        <div className="space-y-3">
+          {syllabus.extractedTopics.map((t, i) => (
+            <div
+              key={i}
+              className="p-3 rounded-xl"
+              style={{
+                background: "rgba(255, 255, 255, 0.03)",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
+              }}
+            >
+              <div className="flex items-baseline gap-2">
+                <span
+                  className="text-xs font-semibold shrink-0"
+                  style={{ color: "#F97316", fontFamily: "var(--font-body)" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p
+                  className="text-sm font-medium"
+                  style={{
+                    color: "var(--text-primary)",
+                    fontFamily: "var(--font-body)",
+                  }}
+                >
+                  {t.topic}
+                </p>
+              </div>
+              {t.subtopics?.length > 0 && (
+                <ul className="mt-2 ml-6 space-y-1">
+                  {t.subtopics.map((st, si) => (
+                    <li
+                      key={si}
+                      className="text-xs flex items-start gap-2"
+                      style={{
+                        color: "var(--text-muted)",
+                        fontFamily: "var(--font-body)",
+                      }}
+                    >
+                      <span className="mt-0.5" style={{ color: "#F97316" }}>
+                        -
+                      </span>
+                      <span>{st}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p
+          className="text-sm text-center py-8"
+          style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}
+        >
+          No topics extracted yet.
+        </p>
+      )}
+    </SlidingPanel>
   );
 }
 
