@@ -717,7 +717,7 @@ function FindVideosModal({ subjectId, defaultQuery, onClose, onSuccess }: FindVi
           </button>
         </form>
 
-        <div className="px-6 pb-6 overflow-y-auto flex-1">
+        <div className="px-6 pb-6 overflow-y-auto flex-1 min-h-0">
           {error && (
             <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#EF4444" }}>
               {error}
