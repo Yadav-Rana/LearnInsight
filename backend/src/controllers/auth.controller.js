@@ -101,6 +101,8 @@ const getMe = asyncHandler(async (req, res, next) => {
       avatar: user.avatar,
       role: user.role,
       enrolledSubjects: user.enrolledSubjects,
+      teacher: user.teacher || null,
+      inviteCode: user.inviteCode || null,
       isActive: user.isActive,
       createdAt: user.createdAt,
     },
@@ -144,6 +146,8 @@ const updateProfile = asyncHandler(async (req, res, next) => {
       avatar: user.avatar,
       role: user.role,
       enrolledSubjects: user.enrolledSubjects,
+      teacher: user.teacher || null,
+      inviteCode: user.inviteCode || null,
     },
   });
 });

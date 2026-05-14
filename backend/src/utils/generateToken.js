@@ -30,6 +30,8 @@ const sendTokenResponse = (user, statusCode, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        teacher: user.teacher || null,
+        inviteCode: user.inviteCode || null,
       },
     });
 };
