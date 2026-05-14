@@ -1,6 +1,10 @@
 const asyncHandler = require("express-async-handler");
 const { Subject } = require("../models");
 const { AppError } = require("../middleware");
+const {
+  applyVisibilityFilter,
+  canViewContent,
+} = require("../utils/visibilityFilter");
 
 /**
  * @desc    Get all subjects (with optional filtering)
@@ -26,6 +30,8 @@ const getSubjects = asyncHandler(async (req, res, next) => {
   if (search) {
     query.name = { $regex: search, $options: "i" };
   }
+
+  applyVisibilityFilter(query, req.user);
 
   let subjects;
 
@@ -66,10 +72,14 @@ const getSubject = asyncHandler(async (req, res, next) => {
     .populate("createdBy", "name")
     .populate({
       path: "children",
-      select: "name description level order",
+      select: "name description level order visibility createdBy",
     });
 
   if (!subject) {
+    return next(new AppError("Subject not found", 404));
+  }
+
+  if (!canViewContent(subject, req.user)) {
     return next(new AppError("Subject not found", 404));
   }
 
@@ -85,7 +95,7 @@ const getSubject = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin/Teacher
  */
 const createSubject = asyncHandler(async (req, res, next) => {
-  const { name, description, icon, parent, level, order } = req.body;
+  const { name, description, icon, parent, level, order, visibility } = req.body;
 
   // If parent is provided, verify it exists and set level
   let parentLevel = -1;
@@ -97,6 +107,12 @@ const createSubject = asyncHandler(async (req, res, next) => {
     parentLevel = parentSubject.level;
   }
 
+  // Only admins can create public content; teachers default to private
+  let resolvedVisibility = "private";
+  if (visibility === "public" && req.user.role === "admin") {
+    resolvedVisibility = "public";
+  }
+
   const subject = await Subject.create({
     name,
     description,
@@ -105,6 +121,7 @@ const createSubject = asyncHandler(async (req, res, next) => {
     level: level !== undefined ? level : parentLevel + 1,
     order: order || 0,
     createdBy: req.user.id,
+    visibility: resolvedVisibility,
   });
 
   res.status(201).json({
@@ -120,7 +137,8 @@ const createSubject = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin/Teacher
  */
 const updateSubject = asyncHandler(async (req, res, next) => {
-  const { name, description, icon, parent, level, order, isActive } = req.body;
+  const { name, description, icon, parent, level, order, isActive, visibility } =
+    req.body;
 
   let subject = await Subject.findById(req.params.id);
 
@@ -149,6 +167,9 @@ const updateSubject = asyncHandler(async (req, res, next) => {
   if (level !== undefined) subject.level = level;
   if (order !== undefined) subject.order = order;
   if (isActive !== undefined) subject.isActive = isActive;
+  if (visibility !== undefined && req.user.role === "admin") {
+    subject.visibility = visibility;
+  }
 
   await subject.save();
 
@@ -169,6 +190,14 @@ const deleteSubject = asyncHandler(async (req, res, next) => {
 
   if (!subject) {
     return next(new AppError("Subject not found", 404));
+  }
+
+  // Owner or admin only (admin authorize is enforced at route, but allow owning teacher too)
+  if (
+    subject.createdBy.toString() !== req.user.id &&
+    req.user.role !== "admin"
+  ) {
+    return next(new AppError("Not authorized to delete this subject", 403));
   }
 
   // Check if subject has children
@@ -204,6 +233,13 @@ const addResource = asyncHandler(async (req, res, next) => {
     return next(new AppError("Subject not found", 404));
   }
 
+  if (
+    subject.createdBy.toString() !== req.user.id &&
+    req.user.role !== "admin"
+  ) {
+    return next(new AppError("Not authorized to modify this subject", 403));
+  }
+
   subject.resources.push({
     title,
     url,
@@ -232,6 +268,13 @@ const removeResource = asyncHandler(async (req, res, next) => {
 
   if (!subject) {
     return next(new AppError("Subject not found", 404));
+  }
+
+  if (
+    subject.createdBy.toString() !== req.user.id &&
+    req.user.role !== "admin"
+  ) {
+    return next(new AppError("Not authorized to modify this subject", 403));
   }
 
   const resourceIndex = subject.resources.findIndex(

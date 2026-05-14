@@ -30,6 +30,11 @@ const createSubjectValidator = [
     .optional()
     .isInt({ min: 0 })
     .withMessage("Order must be a non-negative integer"),
+
+  body("visibility")
+    .optional()
+    .isIn(["public", "private"])
+    .withMessage("Visibility must be public or private"),
 ];
 
 const updateSubjectValidator = [
@@ -66,6 +71,11 @@ const updateSubjectValidator = [
     .optional()
     .isBoolean()
     .withMessage("isActive must be a boolean"),
+
+  body("visibility")
+    .optional()
+    .isIn(["public", "private"])
+    .withMessage("Visibility must be public or private"),
 ];
 
 const subjectIdValidator = [
