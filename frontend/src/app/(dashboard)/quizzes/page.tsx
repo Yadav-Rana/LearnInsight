@@ -18,6 +18,7 @@ interface Quiz {
   questions: Array<{ question: string }>;
   isPublished: boolean;
   isAIGenerated: boolean;
+  visibility?: "public" | "private";
   createdBy: { _id: string; name: string };
   createdAt: string;
 }
@@ -221,6 +222,11 @@ function QuizCard({ quiz, isTeacherOrAdmin, onDelete, onTogglePublish }: QuizCar
           {isTeacherOrAdmin && !quiz.isPublished && (
             <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-muted)" }}>
               Draft
+            </span>
+          )}
+          {isTeacherOrAdmin && quiz.visibility === "public" && (
+            <span className="px-2.5 py-1 text-xs font-medium rounded-full" style={{ background: "rgba(255, 255, 255, 0.04)", border: "1px solid rgba(255, 255, 255, 0.08)", color: "var(--text-muted)" }}>
+              Public
             </span>
           )}
         </div>

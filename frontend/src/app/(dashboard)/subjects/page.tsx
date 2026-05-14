@@ -25,6 +25,7 @@ interface Subject {
     url: string;
     type: "youtube" | "article" | "pdf";
   }>;
+  visibility?: "public" | "private";
   createdAt: string;
 }
 
@@ -184,13 +185,12 @@ export default function SubjectsPage() {
           initial="hidden"
           animate="visible"
         >
-          {rootSubjects.map((subject, index) => (
+          {rootSubjects.map((subject) => (
             <SubjectCard
               key={subject._id}
               subject={subject}
               isTeacherOrAdmin={isTeacherOrAdmin}
               onDelete={fetchSubjects}
-              index={index}
             />
           ))}
         </motion.div>
@@ -218,10 +218,9 @@ interface SubjectCardProps {
   subject: Subject;
   isTeacherOrAdmin: boolean;
   onDelete: () => void;
-  index: number;
 }
 
-function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCardProps) {
+function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -265,7 +264,19 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete, index }: SubjectCard
             </svg>
           </div>
           {isTeacherOrAdmin && (
-            <div className="flex gap-1">
+            <div className="flex items-center gap-1">
+              {subject.visibility === "public" && (
+                <span
+                  className="px-2 py-0.5 text-[10px] font-medium rounded-full mr-1"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.04)",
+                    border: "1px solid rgba(255, 255, 255, 0.08)",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  Public
+                </span>
+              )}
               <Link
                 href={`/subjects/${subject._id}/edit`}
                 className="p-2 rounded-lg transition-colors hover:bg-white/5"
