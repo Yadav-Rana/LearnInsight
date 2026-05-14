@@ -1,6 +1,8 @@
 const asyncHandler = require("express-async-handler");
 const { Insight, Progress, Subject, QuizAttempt } = require("../models");
 const { AppError } = require("../middleware");
+const geminiService = require("../services/gemini.service");
+const youtubeService = require("../services/youtube.service");
 
 /**
  * @desc    Generate insights for current user
@@ -55,9 +57,6 @@ const generateInsights = asyncHandler(async (req, res, next) => {
     return severityOrder[a.severity] - severityOrder[b.severity];
   });
 
-  // Generate recommendations (placeholder - will be enhanced with Gemini)
-  const recommendations = await generateRecommendations(weakAreas, progressData);
-
   // Calculate overall stats
   const overallStats = {
     totalSubjects: progressData.length,
@@ -77,8 +76,27 @@ const generateInsights = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // Generate AI summary (placeholder - will be enhanced with Gemini)
-  const aiSummary = generateSummary(weakAreas, strengths, overallStats);
+  // Build name-resolved snapshots so the AI prompt can read subject names
+  const subjectNames = Object.fromEntries(
+    progressData.map((p) => [p.subject._id.toString(), p.subject.name])
+  );
+  const weakAreasForAI = weakAreas.map((w) => ({
+    ...w,
+    subjectName: subjectNames[w.subject.toString()],
+  }));
+  const strengthsForAI = strengths.map((s) => ({
+    ...s,
+    subjectName: subjectNames[s.subject.toString()],
+  }));
+
+  const [aiSummary, recommendations] = await Promise.all([
+    geminiService.generateInsightSummary({
+      overallStats,
+      weakAreas: weakAreasForAI,
+      strengths: strengthsForAI,
+    }),
+    buildRecommendations(weakAreas, weakAreasForAI),
+  ]);
 
   // Create insight
   const insight = await Insight.create({
@@ -136,17 +154,13 @@ function getSuggestedAction(progress) {
   return "Practice more quizzes and review incorrect answers";
 }
 
-async function generateRecommendations(weakAreas, progressData) {
+async function buildRecommendations(weakAreas, weakAreasForAI) {
   const recommendations = [];
 
-  // Get subjects with resources
+  // Existing curated resources for each weak subject (non-AI)
   for (const weak of weakAreas.slice(0, 3)) {
-    const subject = await Subject.findById(weak.subject).select(
-      "name resources"
-    );
-
+    const subject = await Subject.findById(weak.subject).select("name resources");
     if (subject && subject.resources.length > 0) {
-      // Add existing resources as recommendations
       for (const resource of subject.resources.slice(0, 2)) {
         recommendations.push({
           title: resource.title,
@@ -161,36 +175,32 @@ async function generateRecommendations(weakAreas, progressData) {
     }
   }
 
-  // TODO: Integrate Gemini API for AI-generated recommendations
-  // This is where we'll call Gemini to get YouTube video suggestions
+  if (weakAreasForAI.length === 0) return recommendations;
+
+  // AI-generated YouTube recommendations
+  const subjectByName = Object.fromEntries(
+    weakAreasForAI.map((w) => [w.subjectName, w.subject])
+  );
+  const aiRecs = await geminiService.generateRecommendations({ weakAreas: weakAreasForAI });
+
+  for (const rec of aiRecs) {
+    const videos = await youtubeService
+      .searchVideos({ query: rec.searchQuery, maxResults: 1 })
+      .catch(() => []);
+    if (videos.length === 0) continue;
+    const video = videos[0];
+    recommendations.push({
+      title: rec.title,
+      url: video.url,
+      type: "youtube",
+      relevance: rec.relevance,
+      relatedSubject: subjectByName[rec.topicName],
+      isAIGenerated: true,
+      description: rec.description,
+    });
+  }
 
   return recommendations;
-}
-
-function generateSummary(weakAreas, strengths, overallStats) {
-  // Placeholder summary - will be enhanced with Gemini API
-  let summary = "";
-
-  if (overallStats.averageQuizScore >= 80) {
-    summary = "Excellent progress! You're performing well across subjects. ";
-  } else if (overallStats.averageQuizScore >= 60) {
-    summary = "Good progress overall. Keep up the steady work. ";
-  } else {
-    summary = "There's room for improvement. Focus on the weak areas identified. ";
-  }
-
-  if (weakAreas.length > 0) {
-    summary += `Focus on: ${weakAreas
-      .slice(0, 2)
-      .map((w) => "improving weak areas")
-      .join(", ")}. `;
-  }
-
-  if (strengths.length > 0) {
-    summary += `Great work on your strong subjects!`;
-  }
-
-  return summary;
 }
 
 /**
