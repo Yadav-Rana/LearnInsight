@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   createSyllabus,
+  uploadSyllabus,
   getMySyllabuses,
   getSyllabus,
   updateSyllabus,
@@ -13,6 +14,7 @@ const {
 
 const { protect } = require("../middleware");
 const validate = require("../middleware/validate");
+const { singleDocument } = require("../middleware/upload");
 
 const {
   createSyllabusValidator,
@@ -22,6 +24,9 @@ const {
 
 // All routes require authentication
 router.use(protect);
+
+// Document upload (multipart). Must come before /:id so it doesn't get treated as an id.
+router.post("/upload", singleDocument("file"), uploadSyllabus);
 
 router
   .route("/")

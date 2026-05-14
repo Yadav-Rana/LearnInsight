@@ -1,7 +1,9 @@
+const path = require("path");
 const asyncHandler = require("express-async-handler");
 const { Syllabus, Subject, Quiz } = require("../models");
 const { AppError } = require("../middleware");
 const geminiService = require("../services/gemini.service");
+const documentExtractor = require("../services/documentExtractor.service");
 
 /**
  * @desc    Upload/Create syllabus
@@ -24,6 +26,64 @@ const createSyllabus = asyncHandler(async (req, res, next) => {
     content,
     fileName: fileName || null,
     fileType: fileType || "manual",
+    status: "pending",
+  });
+
+  res.status(201).json({
+    success: true,
+    message: "Syllabus uploaded successfully",
+    syllabus,
+  });
+});
+
+/**
+ * @desc    Upload a syllabus document and extract its text
+ * @route   POST /api/v1/syllabus/upload
+ * @access  Private
+ *
+ * Accepts multipart/form-data with fields:
+ *   - file:    PDF | DOCX | TXT (handled by upload middleware)
+ *   - subject: Mongo ObjectId
+ *   - title:   optional; falls back to the filename (without extension)
+ */
+const uploadSyllabus = asyncHandler(async (req, res, next) => {
+  if (!req.file) {
+    return next(new AppError("No file uploaded. Attach a PDF, DOCX, or TXT file.", 400));
+  }
+
+  const { subject, title } = req.body;
+  if (!subject) {
+    return next(new AppError("Subject is required", 400));
+  }
+
+  const subjectExists = await Subject.findById(subject);
+  if (!subjectExists) {
+    return next(new AppError("Subject not found", 404));
+  }
+
+  let extracted;
+  try {
+    extracted = await documentExtractor.extractText(req.file.buffer, {
+      originalName: req.file.originalname,
+      mimetype: req.file.mimetype,
+    });
+  } catch (err) {
+    return next(new AppError(err.message || "Failed to read the document", 400));
+  }
+
+  const fallbackTitle = path
+    .parse(req.file.originalname || "")
+    .name.trim()
+    .slice(0, 200);
+  const resolvedTitle = (title && title.trim()) || fallbackTitle || "Untitled Syllabus";
+
+  const syllabus = await Syllabus.create({
+    user: req.user.id,
+    subject,
+    title: resolvedTitle,
+    content: extracted.text,
+    fileName: req.file.originalname,
+    fileType: extracted.fileType,
     status: "pending",
   });
 
@@ -244,6 +304,7 @@ const extractTopics = asyncHandler(async (req, res, next) => {
 
 module.exports = {
   createSyllabus,
+  uploadSyllabus,
   getMySyllabuses,
   getSyllabus,
   updateSyllabus,
