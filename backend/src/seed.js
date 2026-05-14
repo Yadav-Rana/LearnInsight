@@ -2,6 +2,7 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const config = require("./config");
 const { User, Subject, Quiz, QuizAttempt, Progress, Insight, Syllabus } = require("./models");
+const { generateUniqueInviteCode } = require("./utils/inviteCode");
 
 function randomBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -403,6 +404,7 @@ async function seed() {
       const subject = await Subject.create({
         name: sd.name, description: sd.description, icon: sd.icon,
         level: 0, order: i, createdBy: teacher._id, resources: sd.resources,
+        visibility: "public",
       });
       console.log(`  ${subject.name} (${subject.resources.length} resources)`);
       subjects.push(subject);
@@ -418,6 +420,7 @@ async function seed() {
     const quizzes = [];
     for (const qd of quizzesData) {
       qd.createdBy = teacher._id;
+      qd.visibility = "public";
       const quiz = await Quiz.create(qd);
       console.log(`  ${quiz.title} [${quiz.difficulty}] — ${quiz.questions.length} questions`);
       quizzes.push(quiz);
@@ -485,6 +488,26 @@ async function seed() {
       const enrollIds = [...subjects].sort(() => Math.random() - 0.5).slice(0, numEnroll).map((s) => s._id);
       await User.findByIdAndUpdate(student._id, { enrolledSubjects: enrollIds });
       console.log(`  ${student.name} → ${numEnroll} subjects`);
+    }
+    console.log();
+
+    // ── 8. Tenancy: invite codes + attach seeded students to Yadav-Teacher ──
+    console.log("Wiring tenancy (invite codes + teacher attachment)...");
+    for (const t of [teacher, newTeacher]) {
+      if (t && !t.inviteCode) {
+        t.inviteCode = await generateUniqueInviteCode(User);
+        await t.save();
+        console.log(`  ${t.name}: inviteCode = ${t.inviteCode}`);
+      } else if (t) {
+        console.log(`  ${t.name}: inviteCode = ${t.inviteCode} (existing)`);
+      }
+    }
+    for (const student of allStudents) {
+      if (!student.teacher) {
+        student.teacher = teacher._id;
+        await student.save();
+        console.log(`  ${student.name} → joined ${teacher.name}'s classroom`);
+      }
     }
     console.log();
 
