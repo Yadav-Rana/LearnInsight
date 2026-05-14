@@ -187,10 +187,22 @@ const markResourceViewed = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin/Teacher
  */
 const getStudentProgress = asyncHandler(async (req, res, next) => {
-  const student = await User.findById(req.params.userId).select("name email role");
+  const student = await User.findById(req.params.userId).select(
+    "name email role teacher"
+  );
 
   if (!student) {
     return next(new AppError("User not found", 404));
+  }
+
+  // Teachers can only see progress for their own students
+  if (
+    req.user.role === "teacher" &&
+    (student.role !== "student" ||
+      !student.teacher ||
+      student.teacher.toString() !== req.user.id)
+  ) {
+    return next(new AppError("Not authorized to view this student", 403));
   }
 
   const progress = await Progress.find({ user: req.params.userId })
@@ -210,7 +222,20 @@ const getStudentProgress = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin/Teacher
  */
 const getSubjectStudentsProgress = asyncHandler(async (req, res, next) => {
-  const progress = await Progress.find({ subject: req.params.subjectId })
+  // Teachers only see progress rows for their own students.
+  const userFilter = {};
+  if (req.user.role === "teacher") {
+    const myStudents = await User.find({
+      role: "student",
+      teacher: req.user.id,
+    }).select("_id");
+    userFilter.user = { $in: myStudents.map((s) => s._id) };
+  }
+
+  const progress = await Progress.find({
+    subject: req.params.subjectId,
+    ...userFilter,
+  })
     .populate("user", "name email avatar")
     .sort({ "quizStats.averageScore": -1 });
 

@@ -23,6 +23,12 @@ const getUsers = asyncHandler(async (req, res, next) => {
     ];
   }
 
+  // Teachers only see students attached to them. Admins see everyone.
+  if (req.user.role === "teacher") {
+    query.teacher = req.user.id;
+    query.role = "student";
+  }
+
   // Pagination
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -58,6 +64,16 @@ const getUser = asyncHandler(async (req, res, next) => {
 
   if (!user) {
     return next(new AppError("User not found", 404));
+  }
+
+  // Teachers can only view their own students
+  if (
+    req.user.role === "teacher" &&
+    (user.role !== "student" ||
+      !user.teacher ||
+      user.teacher.toString() !== req.user.id)
+  ) {
+    return next(new AppError("Not authorized to view this user", 403));
   }
 
   res.status(200).json({
@@ -212,7 +228,14 @@ const getUsersByRole = asyncHandler(async (req, res, next) => {
     return next(new AppError("Invalid role", 400));
   }
 
-  const users = await User.find({ role, isActive: true })
+  const baseQuery = { role, isActive: true };
+
+  // Teachers see only their own students
+  if (req.user.role === "teacher" && role === "student") {
+    baseQuery.teacher = req.user.id;
+  }
+
+  const users = await User.find(baseQuery)
     .select("name email avatar createdAt")
     .sort({ name: 1 });
 

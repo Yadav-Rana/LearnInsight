@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const { Insight, Progress, Subject, QuizAttempt } = require("../models");
+const { Insight, Progress, Subject, QuizAttempt, User } = require("../models");
 const { AppError } = require("../middleware");
 const geminiService = require("../services/gemini.service");
 const youtubeService = require("../services/youtube.service");
@@ -275,16 +275,28 @@ const getInsight = asyncHandler(async (req, res, next) => {
     return next(new AppError("Insight not found", 404));
   }
 
-  // Check ownership or admin
-  if (
-    insight.user.toString() !== req.user.id &&
-    !["admin", "teacher"].includes(req.user.role)
-  ) {
-    return next(new AppError("Not authorized to view this insight", 403));
+  const isOwner = insight.user.toString() === req.user.id;
+
+  if (!isOwner) {
+    if (req.user.role === "admin") {
+      // allow
+    } else if (req.user.role === "teacher") {
+      // Teachers can only view insights for their own students
+      const student = await User.findById(insight.user).select("teacher");
+      if (
+        !student ||
+        !student.teacher ||
+        student.teacher.toString() !== req.user.id
+      ) {
+        return next(new AppError("Not authorized to view this insight", 403));
+      }
+    } else {
+      return next(new AppError("Not authorized to view this insight", 403));
+    }
   }
 
   // Mark as viewed if not already
-  if (!insight.isViewed && insight.user.toString() === req.user.id) {
+  if (!insight.isViewed && isOwner) {
     insight.isViewed = true;
     insight.viewedAt = new Date();
     await insight.save();
@@ -302,6 +314,19 @@ const getInsight = asyncHandler(async (req, res, next) => {
  * @access  Private/Admin/Teacher
  */
 const getStudentInsights = asyncHandler(async (req, res, next) => {
+  // Teachers can only view insights for their own students
+  if (req.user.role === "teacher") {
+    const student = await User.findById(req.params.userId).select("role teacher");
+    if (
+      !student ||
+      student.role !== "student" ||
+      !student.teacher ||
+      student.teacher.toString() !== req.user.id
+    ) {
+      return next(new AppError("Not authorized to view this student", 403));
+    }
+  }
+
   const insights = await Insight.find({ user: req.params.userId })
     .populate("weakAreas.subject", "name")
     .populate("strengths.subject", "name")

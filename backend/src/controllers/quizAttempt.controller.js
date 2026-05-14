@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const { QuizAttempt, Quiz, Progress } = require("../models");
+const { QuizAttempt, Quiz, Progress, User } = require("../models");
 const { AppError } = require("../middleware");
 const { canViewContent } = require("../utils/visibilityFilter");
 
@@ -142,9 +142,15 @@ const getMyAttempts = asyncHandler(async (req, res, next) => {
   const { quizId, page = 1, limit = 10 } = req.query;
 
   const query = {};
-  // Teachers/admins see all attempts; students see only their own
+  // Students see only their own; teachers see only their own students; admins see all
   if (req.user.role === "student") {
     query.user = req.user.id;
+  } else if (req.user.role === "teacher") {
+    const myStudents = await User.find({
+      role: "student",
+      teacher: req.user.id,
+    }).select("_id");
+    query.user = { $in: myStudents.map((s) => s._id) };
   }
   if (quizId) query.quiz = quizId;
 
@@ -186,12 +192,22 @@ const getAttempt = asyncHandler(async (req, res, next) => {
     return next(new AppError("Attempt not found", 404));
   }
 
-  // Check ownership or admin/teacher
-  if (
-    attempt.user.toString() !== req.user.id &&
-    !["admin", "teacher"].includes(req.user.role)
-  ) {
-    return next(new AppError("Not authorized to view this attempt", 403));
+  const isOwner = attempt.user.toString() === req.user.id;
+  if (!isOwner) {
+    if (req.user.role === "admin") {
+      // allow
+    } else if (req.user.role === "teacher") {
+      const student = await User.findById(attempt.user).select("teacher");
+      if (
+        !student ||
+        !student.teacher ||
+        student.teacher.toString() !== req.user.id
+      ) {
+        return next(new AppError("Not authorized to view this attempt", 403));
+      }
+    } else {
+      return next(new AppError("Not authorized to view this attempt", 403));
+    }
   }
 
   res.status(200).json({
@@ -209,13 +225,23 @@ const getAttemptsByQuiz = asyncHandler(async (req, res, next) => {
   const { page = 1, limit = 20 } = req.query;
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
+  const attemptFilter = { quiz: req.params.quizId };
+  // Teachers only see attempts from their own students.
+  if (req.user.role === "teacher") {
+    const myStudents = await User.find({
+      role: "student",
+      teacher: req.user.id,
+    }).select("_id");
+    attemptFilter.user = { $in: myStudents.map((s) => s._id) };
+  }
+
   const [attempts, total] = await Promise.all([
-    QuizAttempt.find({ quiz: req.params.quizId })
+    QuizAttempt.find(attemptFilter)
       .populate("user", "name email")
       .sort({ completedAt: -1 })
       .skip(skip)
       .limit(parseInt(limit)),
-    QuizAttempt.countDocuments({ quiz: req.params.quizId }),
+    QuizAttempt.countDocuments(attemptFilter),
   ]);
 
   // Calculate stats
@@ -228,7 +254,7 @@ const getAttemptsByQuiz = asyncHandler(async (req, res, next) => {
   };
 
   if (attempts.length > 0) {
-    const allAttempts = await QuizAttempt.find({ quiz: req.params.quizId });
+    const allAttempts = await QuizAttempt.find(attemptFilter);
     const scores = allAttempts.map((a) => a.percentage);
     stats.averageScore = Math.round(
       scores.reduce((a, b) => a + b, 0) / scores.length
