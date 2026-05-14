@@ -39,6 +39,12 @@ interface Recommendation {
   relevance: number;
   relatedSubject?: { _id: string; name: string } | null;
   description?: string;
+  isAIGenerated?: boolean;
+}
+
+function extractYoutubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : null;
 }
 
 interface OverallStats {
@@ -379,27 +385,45 @@ export default function InsightsPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {insight.recommendations.map((rec, index) => (
-                    <a
-                      key={rec._id || index}
-                      href={rec.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-white/5"
-                      style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
-                    >
-                      <div className="flex-shrink-0">{getTypeIcon(rec.type)}</div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>{rec.title}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                          {rec.relatedSubject?.name || rec.description || rec.type}
-                        </p>
-                      </div>
-                      <span className="flex-shrink-0 text-xs px-2 py-1 rounded-full" style={{ background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.3)", color: "#3B82F6" }}>
-                        {rec.relevance}%
-                      </span>
-                    </a>
-                  ))}
+                  {insight.recommendations.map((rec, index) => {
+                    const ytId = rec.type === "youtube" ? extractYoutubeId(rec.url) : null;
+                    return (
+                      <a
+                        key={rec._id || index}
+                        href={rec.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 p-3 rounded-xl transition-all duration-200 hover:bg-white/5"
+                        style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid rgba(255, 255, 255, 0.06)" }}
+                      >
+                        {ytId ? (
+                          <img
+                            src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`}
+                            alt=""
+                            className="w-24 h-14 rounded-lg object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="flex-shrink-0">{getTypeIcon(rec.type)}</div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm truncate" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>{rec.title}</p>
+                            {rec.isAIGenerated && (
+                              <span className="flex-shrink-0 text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: "rgba(168, 85, 247, 0.15)", border: "1px solid rgba(168, 85, 247, 0.3)", color: "#A855F7" }}>
+                                AI
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-muted)" }}>
+                            {rec.relatedSubject?.name || rec.description || rec.type}
+                          </p>
+                        </div>
+                        <span className="flex-shrink-0 text-xs px-2 py-1 rounded-full" style={{ background: "rgba(59, 130, 246, 0.15)", border: "1px solid rgba(59, 130, 246, 0.3)", color: "#3B82F6" }}>
+                          {rec.relevance}%
+                        </span>
+                      </a>
+                    );
+                  })}
                 </div>
               )}
             </GlassCard>
