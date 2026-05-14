@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { Loader } from "@/components/ui";
 import { GlassCard } from "@/components/dashboard";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Question {
   question: string;
@@ -36,6 +37,8 @@ const sectionMotion = (i: number) => ({
 export default function CreateQuizPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -48,6 +51,7 @@ export default function CreateQuizPage() {
     timeLimit: null as number | null,
     passingScore: 60,
     showAnswers: true,
+    isPublic: false,
     questions: [
       { question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "", points: 1 },
     ] as Question[],
@@ -70,7 +74,20 @@ export default function CreateQuizPage() {
     try {
       setSaving(true);
       setError("");
-      const response = await api.post("/quizzes", quiz);
+      const payload: Record<string, unknown> = {
+        title: quiz.title,
+        description: quiz.description,
+        subject: quiz.subject,
+        difficulty: quiz.difficulty,
+        timeLimit: quiz.timeLimit,
+        passingScore: quiz.passingScore,
+        showAnswers: quiz.showAnswers,
+        questions: quiz.questions,
+      };
+      if (isAdmin) {
+        payload.visibility = quiz.isPublic ? "public" : "private";
+      }
+      const response = await api.post("/quizzes", payload);
       const newId = response.data.data?._id;
       router.push(newId ? `/quizzes/${newId}` : "/quizzes");
     } catch (err: unknown) {
@@ -188,6 +205,15 @@ export default function CreateQuizPage() {
               <input type="checkbox" checked={quiz.showAnswers} onChange={(e) => setQuiz({ ...quiz, showAnswers: e.target.checked })} className="w-4 h-4 accent-orange-500" />
               <span className="text-sm" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>Show answers after submission</span>
             </label>
+            {isAdmin && (
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" checked={quiz.isPublic} onChange={(e) => setQuiz({ ...quiz, isPublic: e.target.checked })} className="w-4 h-4 mt-0.5 accent-orange-500" />
+                <span>
+                  <span className="block text-sm" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>Make this quiz public</span>
+                  <span className="block text-xs mt-0.5" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>Visible to all teachers and students.</span>
+                </span>
+              </label>
+            )}
           </div>
         </GlassCard>
       </motion.div>

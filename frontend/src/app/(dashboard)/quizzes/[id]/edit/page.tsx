@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import api from "@/lib/api";
 import { Loader } from "@/components/ui";
 import { GlassCard } from "@/components/dashboard";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Question {
   _id?: string;
@@ -25,6 +26,7 @@ interface QuizData {
   passingScore: number;
   showAnswers: boolean;
   isPublished: boolean;
+  visibility: "public" | "private";
   questions: Question[];
 }
 
@@ -49,6 +51,8 @@ const sectionMotion = (i: number) => ({
 export default function EditQuizPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -62,6 +66,7 @@ export default function EditQuizPage() {
     passingScore: 60,
     showAnswers: true,
     isPublished: false,
+    visibility: "private",
     questions: [],
   });
 
@@ -80,6 +85,7 @@ export default function EditQuizPage() {
         passingScore: q.passingScore || 60,
         showAnswers: q.showAnswers !== false,
         isPublished: q.isPublished,
+        visibility: q.visibility === "public" ? "public" : "private",
         questions: q.questions.map((qu: Question) => ({
           _id: qu._id,
           question: qu.question,
@@ -101,7 +107,10 @@ export default function EditQuizPage() {
     try {
       setSaving(true);
       setError("");
-      await api.put(`/quizzes/${params.id}`, quiz);
+      const { visibility, ...rest } = quiz;
+      const payload: Record<string, unknown> = { ...rest };
+      if (isAdmin) payload.visibility = visibility;
+      await api.put(`/quizzes/${params.id}`, payload);
       router.push(`/quizzes/${params.id}`);
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -302,6 +311,19 @@ export default function EditQuizPage() {
                   Published
                 </span>
               </label>
+              {isAdmin && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={quiz.visibility === "public"}
+                    onChange={(e) => setQuiz({ ...quiz, visibility: e.target.checked ? "public" : "private" })}
+                    className="w-4 h-4 accent-orange-500"
+                  />
+                  <span className="text-sm" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
+                    Public
+                  </span>
+                </label>
+              )}
             </div>
           </div>
         </GlassCard>

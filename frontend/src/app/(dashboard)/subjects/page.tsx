@@ -206,6 +206,7 @@ export default function SubjectsPage() {
               fetchSubjects();
             }}
             subjects={subjects}
+            isAdmin={user?.role === "admin"}
           />
         )}
       </AnimatePresence>
@@ -337,10 +338,16 @@ interface CreateSubjectModalProps {
   onClose: () => void;
   onSuccess: () => void;
   subjects: Subject[];
+  isAdmin: boolean;
 }
 
-function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModalProps) {
-  const [formData, setFormData] = useState({ name: "", description: "", parent: "" });
+function CreateSubjectModal({ onClose, onSuccess, subjects, isAdmin }: CreateSubjectModalProps) {
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    parent: "",
+    isPublic: false,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -349,7 +356,12 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
     setError("");
     try {
       setLoading(true);
-      await api.post("/subjects", { name: formData.name, description: formData.description, ...(formData.parent ? { parent: formData.parent } : {}) });
+      await api.post("/subjects", {
+        name: formData.name,
+        description: formData.description,
+        ...(formData.parent ? { parent: formData.parent } : {}),
+        ...(isAdmin ? { visibility: formData.isPublic ? "public" : "private" } : {}),
+      });
       onSuccess();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create subject";
@@ -444,6 +456,31 @@ function CreateSubjectModal({ onClose, onSuccess, subjects }: CreateSubjectModal
               ))}
             </select>
           </div>
+
+          {isAdmin && (
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isPublic}
+                onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
+                className="w-4 h-4 mt-0.5 accent-orange-500"
+              />
+              <span>
+                <span
+                  className="block text-sm font-medium"
+                  style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}
+                >
+                  Make this subject public
+                </span>
+                <span
+                  className="block text-xs mt-0.5"
+                  style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}
+                >
+                  Visible to all teachers and students.
+                </span>
+              </span>
+            </label>
+          )}
 
           <div className="flex gap-3 pt-4">
             <button
