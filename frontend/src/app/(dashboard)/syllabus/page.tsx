@@ -341,9 +341,29 @@ export default function SyllabusPage() {
   );
 }
 
+const ACCEPTED_EXTS = ".pdf,.docx,.txt,.md";
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function titleFromFilename(name: string): string {
+  const dot = name.lastIndexOf(".");
+  return (dot > 0 ? name.slice(0, dot) : name).trim();
+}
+
 function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [formData, setFormData] = useState({ title: "", subject: "", content: "" });
+  const [mode, setMode] = useState<"file" | "paste">("file");
+  const [subject, setSubject] = useState("");
+  const [title, setTitle] = useState("");
+  const [titleTouched, setTitleTouched] = useState(false);
+  const [content, setContent] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -353,17 +373,74 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
     });
   }, []);
 
+  const handleFileSelected = (f: File | null) => {
+    setError("");
+    if (!f) {
+      setFile(null);
+      return;
+    }
+    if (f.size > MAX_UPLOAD_BYTES) {
+      setError(`File is too large (${formatBytes(f.size)}). Max 10 MB.`);
+      return;
+    }
+    const lower = f.name.toLowerCase();
+    const okExt = /\.(pdf|docx|txt|md)$/i.test(lower);
+    if (!okExt) {
+      setError("Unsupported file format. Upload a PDF, DOCX, or TXT file.");
+      return;
+    }
+    setFile(f);
+    if (!titleTouched) {
+      setTitle(titleFromFilename(f.name).slice(0, 200));
+    }
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragging(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) handleFileSelected(f);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+    if (!subject) {
+      setError("Pick a subject first.");
+      return;
+    }
+
     try {
       setLoading(true);
-      setError("");
-      await api.post("/syllabus", {
-        title: formData.title,
-        subject: formData.subject,
-        content: formData.content,
-        fileType: "manual",
-      });
+      if (mode === "file") {
+        if (!file) {
+          setError("Choose a PDF, DOCX, or TXT file to upload.");
+          return;
+        }
+        const fd = new FormData();
+        fd.append("file", file);
+        fd.append("subject", subject);
+        if (title.trim()) fd.append("title", title.trim());
+        await api.post("/syllabus/upload", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        if (!content.trim()) {
+          setError("Paste the syllabus text first.");
+          return;
+        }
+        if (!title.trim()) {
+          setError("Title is required when pasting.");
+          return;
+        }
+        await api.post("/syllabus", {
+          title: title.trim(),
+          subject,
+          content: content.trim(),
+          fileType: "manual",
+        });
+      }
       onSuccess();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to upload syllabus";
@@ -378,6 +455,18 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
     border: "1px solid rgba(255, 255, 255, 0.1)",
     color: "var(--text-primary)",
     fontFamily: "var(--font-body)",
+  };
+
+  const tabBaseStyle: React.CSSProperties = {
+    fontFamily: "var(--font-body)",
+    borderBottom: "2px solid transparent",
+    color: "var(--text-muted)",
+  };
+
+  const tabActiveStyle: React.CSSProperties = {
+    fontFamily: "var(--font-body)",
+    borderBottom: "2px solid #F97316",
+    color: "var(--text-primary)",
   };
 
   return (
@@ -399,7 +488,7 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
           backdropFilter: "blur(20px)",
         }}
       >
-        <div className="flex items-center justify-between p-6" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
+        <div className="flex items-center justify-between p-6 pb-4" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
           <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
             Upload Syllabus
           </h2>
@@ -407,6 +496,26 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-2 px-6 pt-3" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
+          <button
+            type="button"
+            onClick={() => setMode("file")}
+            className="px-3 py-2 text-sm font-medium transition-colors"
+            style={mode === "file" ? tabActiveStyle : tabBaseStyle}
+          >
+            Upload File
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("paste")}
+            className="px-3 py-2 text-sm font-medium transition-colors"
+            style={mode === "paste" ? tabActiveStyle : tabBaseStyle}
+          >
+            Paste Text
           </button>
         </div>
 
@@ -419,26 +528,11 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
 
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
-              Title *
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-              className="w-full px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500/30"
-              style={inputStyle}
-              placeholder="e.g. Data Structures Unit 1"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
               Subject *
             </label>
             <select
-              value={formData.subject}
-              onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               required
               className="w-full px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500/30"
               style={inputStyle}
@@ -452,20 +546,94 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
             </select>
           </div>
 
+          {mode === "file" ? (
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
+                Document *
+              </label>
+              <label
+                htmlFor="syllabus-file-input"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragging(true);
+                }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={onDrop}
+                className="block w-full rounded-xl px-4 py-6 text-center cursor-pointer transition-colors"
+                style={{
+                  background: dragging
+                    ? "rgba(249, 115, 22, 0.08)"
+                    : "rgba(255, 255, 255, 0.03)",
+                  border: `1px dashed ${dragging ? "rgba(249, 115, 22, 0.5)" : "rgba(255, 255, 255, 0.15)"}`,
+                }}
+              >
+                {file ? (
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)", fontFamily: "var(--font-body)" }}>
+                      {file.name}
+                    </p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
+                      {formatBytes(file.size)} - click to choose a different file
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <svg className="w-7 h-7 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <p className="text-sm" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
+                      Drop a PDF, DOCX, or TXT here, or click to browse
+                    </p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
+                      Max 10 MB. We will extract the text on the server.
+                    </p>
+                  </div>
+                )}
+                <input
+                  id="syllabus-file-input"
+                  type="file"
+                  accept={ACCEPTED_EXTS}
+                  className="hidden"
+                  onChange={(e) => handleFileSelected(e.target.files?.[0] || null)}
+                />
+              </label>
+            </div>
+          ) : null}
+
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
-              Content *
+              Title {mode === "paste" ? "*" : <span style={{ color: "var(--text-muted)" }}>(optional)</span>}
             </label>
-            <textarea
-              value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              required
-              rows={8}
-              className="w-full px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500/30 resize-none"
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setTitleTouched(true);
+              }}
+              required={mode === "paste"}
+              className="w-full px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500/30"
               style={inputStyle}
-              placeholder="Paste your syllabus content here..."
+              placeholder={mode === "file" ? "Auto-filled from filename" : "e.g. Data Structures Unit 1"}
             />
           </div>
+
+          {mode === "paste" && (
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: "var(--text-secondary)", fontFamily: "var(--font-body)" }}>
+                Content *
+              </label>
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+                rows={8}
+                className="w-full px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-orange-500/30 resize-none"
+                style={inputStyle}
+                placeholder="Paste your syllabus content here..."
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 pt-2">
             <button
@@ -491,7 +659,13 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
                 fontFamily: "var(--font-body)",
               }}
             >
-              {loading ? "Uploading..." : "Upload"}
+              {loading
+                ? mode === "file"
+                  ? "Extracting..."
+                  : "Uploading..."
+                : mode === "file"
+                ? "Upload & Extract"
+                : "Save"}
             </button>
           </div>
         </form>
