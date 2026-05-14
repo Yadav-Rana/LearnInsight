@@ -40,6 +40,20 @@ const userSchema = new mongoose.Schema(
         ref: "Subject",
       },
     ],
+    // Students only: which teacher they are attached to (null until they join via invite code)
+    teacher: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+    // Teachers only: short code students use to join the teacher's classroom
+    inviteCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+      uppercase: true,
+      trim: true,
+    },
     isActive: {
       type: Boolean,
       default: true,

@@ -64,6 +64,11 @@ const subjectSchema = new mongoose.Schema(
       required: true,
     },
     resources: [resourceSchema],
+    visibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "private",
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -87,5 +92,6 @@ subjectSchema.virtual("children", {
 subjectSchema.index({ parent: 1 });
 subjectSchema.index({ level: 1 });
 subjectSchema.index({ createdBy: 1 });
+subjectSchema.index({ visibility: 1 });
 
 module.exports = mongoose.model("Subject", subjectSchema);

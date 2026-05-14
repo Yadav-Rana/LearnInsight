@@ -95,6 +95,11 @@ const quizSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    visibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "private",
+    },
     totalPoints: {
       type: Number,
       default: 0,
@@ -117,5 +122,6 @@ quizSchema.index({ subject: 1 });
 quizSchema.index({ createdBy: 1 });
 quizSchema.index({ isPublished: 1 });
 quizSchema.index({ difficulty: 1 });
+quizSchema.index({ visibility: 1 });
 
 module.exports = mongoose.model("Quiz", quizSchema);
