@@ -10,6 +10,7 @@ const quizAttemptRoutes = require("./quizAttempt.routes");
 const progressRoutes = require("./progress.routes");
 const insightRoutes = require("./insight.routes");
 const syllabusRoutes = require("./syllabus.routes");
+const youtubeRoutes = require("./youtube.routes");
 
 // Health check route
 router.get("/health", (req, res) => {
@@ -29,5 +30,6 @@ router.use("/attempts", quizAttemptRoutes);
 router.use("/progress", progressRoutes);
 router.use("/insights", insightRoutes);
 router.use("/syllabus", syllabusRoutes);
+router.use("/youtube", youtubeRoutes);
 
 module.exports = router;
