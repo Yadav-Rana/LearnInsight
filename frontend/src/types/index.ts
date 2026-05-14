@@ -6,6 +6,9 @@ export interface User {
   role: "student" | "teacher" | "admin";
   avatar?: string;
   enrolledSubjects: string[];
+  // Multi-tenancy
+  teacher?: string | User | null;
+  inviteCode?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -64,6 +67,7 @@ export interface Subject {
   createdBy: string;
   resources: Resource[];
   children?: Subject[];
+  visibility?: "public" | "private";
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +94,7 @@ export interface Quiz {
   timeLimit?: number;
   passingScore: number;
   isPublished: boolean;
+  visibility?: "public" | "private";
   totalPoints: number;
   createdAt: string;
   updatedAt: string;
