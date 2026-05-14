@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const { QuizAttempt, Quiz, Progress } = require("../models");
 const { AppError } = require("../middleware");
+const { canViewContent } = require("../utils/visibilityFilter");
 
 /**
  * @desc    Submit quiz attempt
@@ -14,6 +15,10 @@ const submitAttempt = asyncHandler(async (req, res, next) => {
   const quiz = await Quiz.findById(quizId);
 
   if (!quiz) {
+    return next(new AppError("Quiz not found", 404));
+  }
+
+  if (!canViewContent(quiz, req.user)) {
     return next(new AppError("Quiz not found", 404));
   }
 

@@ -63,6 +63,11 @@ const createQuizValidator = [
     .optional()
     .isBoolean()
     .withMessage("showAnswers must be a boolean"),
+
+  body("visibility")
+    .optional()
+    .isIn(["public", "private"])
+    .withMessage("Visibility must be public or private"),
 ];
 
 const updateQuizValidator = [
@@ -109,6 +114,11 @@ const updateQuizValidator = [
     .optional()
     .isBoolean()
     .withMessage("showAnswers must be a boolean"),
+
+  body("visibility")
+    .optional()
+    .isIn(["public", "private"])
+    .withMessage("Visibility must be public or private"),
 ];
 
 const quizIdValidator = [

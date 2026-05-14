@@ -1,6 +1,10 @@
 const asyncHandler = require("express-async-handler");
 const { Quiz, Subject } = require("../models");
 const { AppError } = require("../middleware");
+const {
+  applyVisibilityFilter,
+  canViewContent,
+} = require("../utils/visibilityFilter");
 
 /**
  * @desc    Get all quizzes
@@ -39,6 +43,8 @@ const getQuizzes = asyncHandler(async (req, res, next) => {
     ];
   }
 
+  applyVisibilityFilter(query, req.user);
+
   // Pagination
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
@@ -74,6 +80,11 @@ const getQuiz = asyncHandler(async (req, res, next) => {
     .populate("createdBy", "name");
 
   if (!quiz) {
+    return next(new AppError("Quiz not found", 404));
+  }
+
+  // Tenancy check: hide quizzes the requester is not allowed to see
+  if (!canViewContent(quiz, req.user)) {
     return next(new AppError("Quiz not found", 404));
   }
 
@@ -114,12 +125,19 @@ const createQuiz = asyncHandler(async (req, res, next) => {
     timeLimit,
     passingScore,
     showAnswers,
+    visibility,
   } = req.body;
 
   // Verify subject exists
   const subjectExists = await Subject.findById(subject);
   if (!subjectExists) {
     return next(new AppError("Subject not found", 404));
+  }
+
+  // Only admins can mint public quizzes; teachers default to private
+  let resolvedVisibility = "private";
+  if (visibility === "public" && req.user.role === "admin") {
+    resolvedVisibility = "public";
   }
 
   const quiz = await Quiz.create({
@@ -133,6 +151,7 @@ const createQuiz = asyncHandler(async (req, res, next) => {
     showAnswers: showAnswers !== undefined ? showAnswers : true,
     createdBy: req.user.id,
     isAIGenerated: false,
+    visibility: resolvedVisibility,
   });
 
   res.status(201).json({
@@ -188,6 +207,9 @@ const updateQuiz = asyncHandler(async (req, res, next) => {
   if (passingScore !== undefined) quiz.passingScore = passingScore;
   if (isPublished !== undefined) quiz.isPublished = isPublished;
   if (req.body.showAnswers !== undefined) quiz.showAnswers = req.body.showAnswers;
+  if (req.body.visibility !== undefined && req.user.role === "admin") {
+    quiz.visibility = req.body.visibility;
+  }
 
   await quiz.save();
 
@@ -263,9 +285,13 @@ const getQuizzesBySubject = asyncHandler(async (req, res, next) => {
     query.isPublished = true;
   }
 
+  applyVisibilityFilter(query, req.user);
+
   const quizzes = await Quiz.find(query)
     .populate("createdBy", "name")
-    .select("title description difficulty timeLimit totalPoints isPublished createdAt")
+    .select(
+      "title description difficulty timeLimit totalPoints isPublished isAIGenerated visibility createdBy createdAt"
+    )
     .sort({ createdAt: -1 });
 
   res.status(200).json({
@@ -287,6 +313,11 @@ const duplicateQuiz = asyncHandler(async (req, res, next) => {
     return next(new AppError("Quiz not found", 404));
   }
 
+  // Can only duplicate quizzes you're allowed to see
+  if (!canViewContent(originalQuiz, req.user)) {
+    return next(new AppError("Quiz not found", 404));
+  }
+
   const duplicatedQuiz = await Quiz.create({
     title: `${originalQuiz.title} (Copy)`,
     description: originalQuiz.description,
@@ -298,6 +329,7 @@ const duplicateQuiz = asyncHandler(async (req, res, next) => {
     createdBy: req.user.id,
     isAIGenerated: false,
     isPublished: false,
+    visibility: "private",
   });
 
   res.status(201).json({
