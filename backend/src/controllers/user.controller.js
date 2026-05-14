@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const { User } = require("../models");
 const { AppError } = require("../middleware");
+const { generateUniqueInviteCode } = require("../utils/inviteCode");
 
 /**
  * @desc    Get all users
@@ -222,6 +223,145 @@ const getUsersByRole = asyncHandler(async (req, res, next) => {
   });
 });
 
+/**
+ * @desc    Get my invite code (teacher only). Creates one if missing.
+ * @route   GET /api/v1/users/me/invite-code
+ * @access  Private/Teacher
+ */
+const getMyInviteCode = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== "teacher" && req.user.role !== "admin") {
+    return next(new AppError("Only teachers can have an invite code", 403));
+  }
+
+  if (!req.user.inviteCode) {
+    req.user.inviteCode = await generateUniqueInviteCode(User);
+    await req.user.save();
+  }
+
+  res.status(200).json({
+    success: true,
+    inviteCode: req.user.inviteCode,
+  });
+});
+
+/**
+ * @desc    Regenerate my invite code (teacher only). Invalidates old code.
+ * @route   POST /api/v1/users/me/regenerate-invite-code
+ * @access  Private/Teacher
+ */
+const regenerateInviteCode = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== "teacher" && req.user.role !== "admin") {
+    return next(new AppError("Only teachers can have an invite code", 403));
+  }
+
+  req.user.inviteCode = await generateUniqueInviteCode(User);
+  await req.user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Invite code regenerated",
+    inviteCode: req.user.inviteCode,
+  });
+});
+
+/**
+ * @desc    Student submits an invite code to attach to a teacher.
+ * @route   POST /api/v1/users/join-teacher
+ * @access  Private/Student
+ */
+const joinTeacher = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== "student") {
+    return next(new AppError("Only students can join a teacher", 403));
+  }
+
+  const code = (req.body.code || "").trim().toUpperCase();
+  if (!code) {
+    return next(new AppError("Invite code is required", 400));
+  }
+
+  const teacher = await User.findOne({
+    inviteCode: code,
+    role: "teacher",
+    isActive: true,
+  }).select("_id name email");
+
+  if (!teacher) {
+    return next(new AppError("Invalid invite code", 404));
+  }
+
+  req.user.teacher = teacher._id;
+  await req.user.save();
+
+  res.status(200).json({
+    success: true,
+    message: `Joined ${teacher.name}'s classroom`,
+    teacher: {
+      id: teacher._id,
+      name: teacher.name,
+      email: teacher.email,
+    },
+  });
+});
+
+/**
+ * @desc    Student leaves their current teacher.
+ * @route   DELETE /api/v1/users/me/teacher
+ * @access  Private/Student
+ */
+const leaveTeacher = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== "student") {
+    return next(new AppError("Only students can leave a teacher", 403));
+  }
+
+  if (!req.user.teacher) {
+    return next(new AppError("You are not currently attached to a teacher", 400));
+  }
+
+  req.user.teacher = null;
+  await req.user.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Left teacher's classroom",
+  });
+});
+
+/**
+ * @desc    Teacher removes a student from their roster.
+ * @route   POST /api/v1/users/:id/remove-student
+ * @access  Private/Teacher
+ */
+const removeStudent = asyncHandler(async (req, res, next) => {
+  if (req.user.role !== "teacher" && req.user.role !== "admin") {
+    return next(new AppError("Not authorized", 403));
+  }
+
+  const student = await User.findById(req.params.id);
+  if (!student) {
+    return next(new AppError("Student not found", 404));
+  }
+
+  if (student.role !== "student") {
+    return next(new AppError("Target user is not a student", 400));
+  }
+
+  // Teachers can only remove their own students; admins can remove any
+  if (
+    req.user.role === "teacher" &&
+    (!student.teacher || student.teacher.toString() !== req.user.id)
+  ) {
+    return next(new AppError("Student is not in your classroom", 403));
+  }
+
+  student.teacher = null;
+  await student.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Student removed from classroom",
+  });
+});
+
 module.exports = {
   getUsers,
   getUser,
@@ -230,4 +370,9 @@ module.exports = {
   enrollInSubject,
   unenrollFromSubject,
   getUsersByRole,
+  getMyInviteCode,
+  regenerateInviteCode,
+  joinTeacher,
+  leaveTeacher,
+  removeStudent,
 };

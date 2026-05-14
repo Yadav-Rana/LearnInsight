@@ -33,8 +33,20 @@ const enrollSubjectValidator = [
   body("subjectId").isMongoId().withMessage("Invalid subject ID"),
 ];
 
+const joinTeacherValidator = [
+  body("code")
+    .trim()
+    .notEmpty()
+    .withMessage("Invite code is required")
+    .isLength({ min: 4, max: 20 })
+    .withMessage("Invite code must be 4-20 characters")
+    .matches(/^[A-Za-z0-9-]+$/)
+    .withMessage("Invite code must be alphanumeric"),
+];
+
 module.exports = {
   updateUserValidator,
   userIdValidator,
   enrollSubjectValidator,
+  joinTeacherValidator,
 };
