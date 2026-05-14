@@ -66,6 +66,7 @@ export default function SubjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showAddResource, setShowAddResource] = useState(false);
+  const [showFindVideos, setShowFindVideos] = useState(false);
 
   const isTeacherOrAdmin = user?.role === "teacher" || user?.role === "admin";
 
@@ -238,13 +239,22 @@ export default function SubjectDetailPage() {
               Resources
             </h2>
             {isTeacherOrAdmin && (
-              <button
-                onClick={() => setShowAddResource(true)}
-                className="text-sm font-medium transition-colors"
-                style={{ color: "#F97316", fontFamily: "var(--font-body)" }}
-              >
-                + Add Resource
-              </button>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setShowFindVideos(true)}
+                  className="text-sm font-medium transition-colors"
+                  style={{ color: "#A855F7", fontFamily: "var(--font-body)" }}
+                >
+                  Find Videos
+                </button>
+                <button
+                  onClick={() => setShowAddResource(true)}
+                  className="text-sm font-medium transition-colors"
+                  style={{ color: "#F97316", fontFamily: "var(--font-body)" }}
+                >
+                  + Add Resource
+                </button>
+              </div>
             )}
           </div>
 
@@ -386,6 +396,21 @@ export default function SubjectDetailPage() {
             onClose={() => setShowAddResource(false)}
             onSuccess={() => {
               setShowAddResource(false);
+              fetchSubject();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Find Videos Modal */}
+      <AnimatePresence>
+        {showFindVideos && (
+          <FindVideosModal
+            subjectId={subject._id}
+            defaultQuery={subject.name}
+            onClose={() => setShowFindVideos(false)}
+            onSuccess={() => {
+              setShowFindVideos(false);
               fetchSubject();
             }}
           />
@@ -565,6 +590,203 @@ function AddResourceModal({ subjectId, onClose, onSuccess }: AddResourceModalPro
             </button>
           </div>
         </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+interface YoutubeVideo {
+  videoId: string;
+  title: string;
+  description: string;
+  channelTitle: string;
+  publishedAt: string;
+  thumbnail: string;
+  url: string;
+}
+
+interface FindVideosModalProps {
+  subjectId: string;
+  defaultQuery: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+function FindVideosModal({ subjectId, defaultQuery, onClose, onSuccess }: FindVideosModalProps) {
+  const [query, setQuery] = useState(defaultQuery);
+  const [videos, setVideos] = useState<YoutubeVideo[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [searching, setSearching] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleSearch = async (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!query.trim()) return;
+    setError("");
+    setSearching(true);
+    setHasSearched(true);
+    try {
+      const res = await api.get(`/youtube/search?q=${encodeURIComponent(query)}&maxResults=8`);
+      setVideos(res.data.data || []);
+      setSelected(new Set());
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "YouTube search failed");
+      setVideos([]);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const toggle = (videoId: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(videoId)) next.delete(videoId);
+      else next.add(videoId);
+      return next;
+    });
+  };
+
+  const handleAddSelected = async () => {
+    if (selected.size === 0) return;
+    setError("");
+    setAdding(true);
+    try {
+      const picks = videos.filter((v) => selected.has(v.videoId));
+      await Promise.all(
+        picks.map((v) =>
+          api.post(`/subjects/${subjectId}/resources`, {
+            title: v.title,
+            url: v.url,
+            type: "youtube",
+            description: `From YouTube channel: ${v.channelTitle}`,
+          })
+        )
+      );
+      onSuccess();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to add selected videos");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        className="relative w-full max-w-2xl rounded-2xl flex flex-col"
+        style={{
+          background: "rgba(20, 20, 25, 0.95)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(20px)",
+          maxHeight: "85vh",
+        }}
+      >
+        <div className="flex items-center justify-between p-6" style={{ borderBottom: "1px solid rgba(255, 255, 255, 0.06)" }}>
+          <h2 className="text-lg font-semibold" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
+            Find Videos on YouTube
+          </h2>
+          <button onClick={onClose} className="p-2 rounded-lg transition-colors hover:bg-white/5" style={{ color: "rgba(255, 255, 255, 0.4)" }}>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSearch} className="p-6 pb-4 flex gap-2">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search query"
+            className="flex-1 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-purple-500/30"
+            style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+          />
+          <button
+            type="submit"
+            disabled={searching || !query.trim()}
+            className="px-5 py-2.5 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)", color: "white", fontFamily: "var(--font-body)" }}
+          >
+            {searching ? "Searching..." : "Search"}
+          </button>
+        </form>
+
+        <div className="px-6 pb-6 overflow-y-auto flex-1">
+          {error && (
+            <div className="mb-4 p-3 rounded-xl text-sm" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#EF4444" }}>
+              {error}
+            </div>
+          )}
+
+          {searching && (
+            <div className="flex justify-center py-8">
+              <Loader size="md" variant="wave" />
+            </div>
+          )}
+
+          {!searching && hasSearched && videos.length === 0 && !error && (
+            <p className="text-center py-8" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
+              No videos found. Try a different query.
+            </p>
+          )}
+
+          {!searching && videos.length > 0 && (
+            <div className="space-y-3">
+              {videos.map((v) => {
+                const isSelected = selected.has(v.videoId);
+                return (
+                  <label
+                    key={v.videoId}
+                    className="flex gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200"
+                    style={{
+                      background: isSelected ? "rgba(168, 85, 247, 0.12)" : "rgba(255, 255, 255, 0.03)",
+                      border: `1px solid ${isSelected ? "rgba(168, 85, 247, 0.4)" : "rgba(255, 255, 255, 0.08)"}`,
+                    }}
+                  >
+                    <input type="checkbox" checked={isSelected} onChange={() => toggle(v.videoId)} className="mt-1" />
+                    <img src={v.thumbnail} alt="" className="w-32 h-20 rounded-lg object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium line-clamp-2" style={{ fontFamily: "var(--font-display)", color: "var(--text-primary)" }}>
+                        {v.title}
+                      </h3>
+                      <p className="text-xs mt-1" style={{ fontFamily: "var(--font-body)", color: "var(--text-muted)" }}>
+                        {v.channelTitle}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {videos.length > 0 && (
+          <div className="flex gap-3 p-6 pt-4" style={{ borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-all duration-200"
+              style={{ background: "rgba(255, 255, 255, 0.05)", border: "1px solid rgba(255, 255, 255, 0.1)", color: "var(--text-primary)", fontFamily: "var(--font-body)" }}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleAddSelected}
+              disabled={adding || selected.size === 0}
+              className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-all duration-200 disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #A855F7 0%, #7C3AED 100%)", color: "white", fontFamily: "var(--font-body)" }}
+            >
+              {adding ? "Adding..." : `Add ${selected.size} Selected`}
+            </button>
+          </div>
+        )}
       </motion.div>
     </motion.div>
   );
