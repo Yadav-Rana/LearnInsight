@@ -8,3 +8,4 @@ export { default as ChartCard } from "./ChartCard";
 export { default as GlassCard } from "./GlassCard";
 export { default as ClassroomCard } from "./ClassroomCard";
 export { default as JoinTeacherBanner } from "./JoinTeacherBanner";
+export { default as ConfirmModal } from "./ConfirmModal";

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
-import { EmptyState, GlassCard } from "@/components/dashboard";
+import { ConfirmModal, EmptyState, GlassCard } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Quiz {
@@ -40,6 +40,8 @@ export default function QuizzesPage() {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDifficulty, setFilterDifficulty] = useState<string>("");
+  const [confirmDelete, setConfirmDelete] = useState<Quiz | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isTeacherOrAdmin = user?.role === "teacher" || user?.role === "admin";
 
@@ -60,13 +62,17 @@ export default function QuizzesPage() {
     }
   };
 
-  const handleDelete = async (quizId: string) => {
-    if (!confirm("Are you sure you want to delete this quiz?")) return;
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      await api.delete(`/quizzes/${quizId}`);
+      setDeletingId(confirmDelete._id);
+      await api.delete(`/quizzes/${confirmDelete._id}`);
+      setConfirmDelete(null);
       fetchQuizzes();
     } catch (err) {
-      alert("Failed to delete quiz");
+      setError(err instanceof Error ? err.message : "Failed to delete quiz");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -178,10 +184,27 @@ export default function QuizzesPage() {
           animate="visible"
         >
           {filteredQuizzes.map((quiz) => (
-            <QuizCard key={quiz._id} quiz={quiz} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={() => handleDelete(quiz._id)} onTogglePublish={() => handleTogglePublish(quiz._id)} />
+            <QuizCard key={quiz._id} quiz={quiz} isTeacherOrAdmin={isTeacherOrAdmin} onDelete={() => setConfirmDelete(quiz)} onTogglePublish={() => handleTogglePublish(quiz._id)} />
           ))}
         </motion.div>
       )}
+
+      <ConfirmModal
+        open={!!confirmDelete}
+        title="Delete this quiz?"
+        description={
+          confirmDelete && (
+            <>
+              <span style={{ color: "var(--text-primary)" }}>{confirmDelete.title}</span> and all its
+              questions will be permanently removed. This cannot be undone.
+            </>
+          )
+        }
+        confirmLabel="Delete"
+        pending={!!confirmDelete && deletingId === confirmDelete._id}
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }

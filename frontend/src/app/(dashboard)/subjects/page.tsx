@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader } from "@/components/ui";
-import { EmptyState, GlassCard } from "@/components/dashboard";
+import { ConfirmModal, EmptyState, GlassCard } from "@/components/dashboard";
 import api from "@/lib/api";
 
 interface Subject {
@@ -58,6 +58,8 @@ export default function SubjectsPage() {
   const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<Subject | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isTeacherOrAdmin = user?.role === "teacher" || user?.role === "admin";
 
@@ -75,6 +77,20 @@ export default function SubjectsPage() {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    try {
+      setDeletingId(confirmDelete._id);
+      await api.delete(`/subjects/${confirmDelete._id}`);
+      setConfirmDelete(null);
+      fetchSubjects();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete subject");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -190,7 +206,7 @@ export default function SubjectsPage() {
               key={subject._id}
               subject={subject}
               isTeacherOrAdmin={isTeacherOrAdmin}
-              onDelete={fetchSubjects}
+              onRequestDelete={() => setConfirmDelete(subject)}
             />
           ))}
         </motion.div>
@@ -210,6 +226,23 @@ export default function SubjectsPage() {
           />
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        open={!!confirmDelete}
+        title="Delete this subject?"
+        description={
+          confirmDelete && (
+            <>
+              <span style={{ color: "var(--text-primary)" }}>{confirmDelete.name}</span> and its
+              attached resources will be permanently removed. This cannot be undone.
+            </>
+          )
+        }
+        confirmLabel="Delete"
+        pending={!!confirmDelete && deletingId === confirmDelete._id}
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
@@ -217,25 +250,10 @@ export default function SubjectsPage() {
 interface SubjectCardProps {
   subject: Subject;
   isTeacherOrAdmin: boolean;
-  onDelete: () => void;
+  onRequestDelete: () => void;
 }
 
-function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) {
-  const [deleting, setDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this subject?")) return;
-    try {
-      setDeleting(true);
-      await api.delete(`/subjects/${subject._id}`);
-      onDelete();
-    } catch (err) {
-      alert("Failed to delete subject");
-      console.error(err);
-    } finally {
-      setDeleting(false);
-    }
-  };
+function SubjectCard({ subject, isTeacherOrAdmin, onRequestDelete }: SubjectCardProps) {
 
   const iconColors = [
     { bg: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.3)", icon: "#3B82F6" },
@@ -287,9 +305,8 @@ function SubjectCard({ subject, isTeacherOrAdmin, onDelete }: SubjectCardProps) 
                 </svg>
               </Link>
               <button
-                onClick={handleDelete}
-                disabled={deleting}
-                className="p-2 rounded-lg transition-colors hover:bg-white/5 disabled:opacity-50"
+                onClick={onRequestDelete}
+                className="p-2 rounded-lg transition-colors hover:bg-white/5"
                 style={{ color: "rgba(255, 255, 255, 0.4)" }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
