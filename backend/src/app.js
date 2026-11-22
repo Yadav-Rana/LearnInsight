@@ -13,9 +13,11 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
+// FRONTEND_URL may be a comma-separated list (e.g. production + preview domains)
+const allowedOrigins = config.frontendUrl.split(",").map((o) => o.trim().replace(/\/$/, ""));
 app.use(
   cors({
-    origin: config.frontendUrl,
+    origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin)),
     credentials: true,
   })
 );

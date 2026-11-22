@@ -24,8 +24,8 @@ const registerValidator = [
 
   body("role")
     .optional()
-    .isIn(["student", "teacher", "admin"])
-    .withMessage("Role must be student, teacher, or admin"),
+    .isIn(["student", "teacher"])
+    .withMessage("Role must be student or teacher"),
 ];
 
 const loginValidator = [

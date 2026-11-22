@@ -1,7 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const { User } = require("../models");
 const { AppError } = require("../middleware");
-const { sendTokenResponse } = require("../utils/generateToken");
+const { sendTokenResponse, cookieOptions } = require("../utils/generateToken");
 const config = require("../config");
 
 /**
@@ -23,7 +23,8 @@ const register = asyncHandler(async (req, res, next) => {
     name,
     email,
     password,
-    role: role || "student",
+    // Admins can only be created by another admin (via /users), never self-registered
+    role: role === "teacher" ? "teacher" : "student",
   });
 
   // Send token response
@@ -66,10 +67,7 @@ const login = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 const logout = asyncHandler(async (req, res, next) => {
-  res.cookie("token", "none", {
-    expires: new Date(Date.now() + 10 * 1000), // 10 seconds
-    httpOnly: true,
-  });
+  res.clearCookie("token", cookieOptions());
 
   res.status(200).json({
     success: true,
