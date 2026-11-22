@@ -32,3 +32,4 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+demo-credentials.txt
