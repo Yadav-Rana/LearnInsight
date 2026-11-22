@@ -1,0 +1,32 @@
+# Render Blueprint for the LearnInsight API.
+# Render dashboard → New → Blueprint → pick this repo. You'll be prompted for
+# every `sync: false` value. The frontend is deployed separately on Vercel.
+services:
+  - type: web
+    name: learninsight-api
+    runtime: node
+    plan: free # free instances sleep after 15 min idle (~30-60s cold start); use "starter" to stay awake
+    rootDir: backend
+    buildCommand: npm ci
+    startCommand: node src/server.js
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production # enables Secure + SameSite=None cookies and hides stack traces
+      - key: MONGODB_URI
+        sync: false # Atlas SRV string; Atlas Network Access must allow 0.0.0.0/0
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: COOKIE_EXPIRE
+        value: "7"
+      - key: FRONTEND_URL
+        sync: false # e.g. https://learninsight.vercel.app (comma-separate extra origins)
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: YOUTUBE_DATA_API_V3
+        sync: false
