@@ -139,4 +139,4 @@ insightSchema.statics.getLatestInsight = async function (userId) {
     .populate("recommendations.relatedSubject", "name");
 };
 
-module.exports = mongoose.model("Insight", insightSchema);
+module.exports = mongoose.models.Insight || mongoose.model("Insight", insightSchema);

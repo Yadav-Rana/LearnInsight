@@ -90,4 +90,4 @@ quizAttemptSchema.statics.getAttemptCount = async function (userId, quizId) {
   return this.countDocuments({ user: userId, quiz: quizId });
 };
 
-module.exports = mongoose.model("QuizAttempt", quizAttemptSchema);
+module.exports = mongoose.models.QuizAttempt || mongoose.model("QuizAttempt", quizAttemptSchema);

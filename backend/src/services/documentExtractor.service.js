@@ -1,4 +1,22 @@
-const { PDFParse } = require("pdf-parse");
+// pdf-parse is loaded lazily: it is heavy and only needed for PDF uploads.
+// It loads @napi-rs/canvas (DOMMatrix etc.) and the pdf.js worker by computed
+// paths, which Vercel's file tracer can't follow. Loading both here through
+// static specifiers gets them shipped; pdf.js then runs the worker in-process
+// via globalThis.pdfjsWorker. pdfjs-dist is pdf-parse's own pinned dependency,
+// so the worker version matches.
+let PDFParse;
+async function loadPdfParse() {
+  if (!PDFParse) {
+    try {
+      require("@napi-rs/canvas");
+    } catch {
+      // optional native binding; pdf-parse warns and falls back
+    }
+    globalThis.pdfjsWorker ??= await import("pdfjs-dist/legacy/build/pdf.worker.mjs");
+    ({ PDFParse } = require("pdf-parse"));
+  }
+  return PDFParse;
+}
 const mammoth = require("mammoth");
 
 const MAX_TEXT_LENGTH = 200_000; // ~200k chars — plenty for syllabus content
@@ -28,7 +46,8 @@ function detectFileType(originalName = "", mimetype = "") {
 }
 
 async function extractFromPdf(buffer) {
-  const parser = new PDFParse({ data: buffer });
+  const Parser = await loadPdfParse();
+  const parser = new Parser({ data: buffer });
   try {
     const result = await parser.getText();
     return result.text || "";

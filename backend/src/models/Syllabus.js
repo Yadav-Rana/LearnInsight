@@ -70,4 +70,4 @@ syllabusSchema.index({ user: 1, subject: 1 });
 syllabusSchema.index({ user: 1 });
 syllabusSchema.index({ status: 1 });
 
-module.exports = mongoose.model("Syllabus", syllabusSchema);
+module.exports = mongoose.models.Syllabus || mongoose.model("Syllabus", syllabusSchema);

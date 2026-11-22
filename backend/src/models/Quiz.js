@@ -124,4 +124,4 @@ quizSchema.index({ isPublished: 1 });
 quizSchema.index({ difficulty: 1 });
 quizSchema.index({ visibility: 1 });
 
-module.exports = mongoose.model("Quiz", quizSchema);
+module.exports = mongoose.models.Quiz || mongoose.model("Quiz", quizSchema);

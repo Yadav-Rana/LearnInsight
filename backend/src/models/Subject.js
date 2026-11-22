@@ -94,4 +94,4 @@ subjectSchema.index({ level: 1 });
 subjectSchema.index({ createdBy: 1 });
 subjectSchema.index({ visibility: 1 });
 
-module.exports = mongoose.model("Subject", subjectSchema);
+module.exports = mongoose.models.Subject || mongoose.model("Subject", subjectSchema);

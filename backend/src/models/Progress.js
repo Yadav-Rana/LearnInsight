@@ -103,4 +103,4 @@ progressSchema.methods.updateQuizStats = async function () {
   return this.save();
 };
 
-module.exports = mongoose.model("Progress", progressSchema);
+module.exports = mongoose.models.Progress || mongoose.model("Progress", progressSchema);

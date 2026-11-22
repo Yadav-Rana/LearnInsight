@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const app = require("./app");
 const config = require("./config");
-const connectDB = require("./config/database");
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (err) => {
@@ -11,8 +10,6 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-// Connect to database
-connectDB();
 
 // Start server
 const server = app.listen(config.port, () => {

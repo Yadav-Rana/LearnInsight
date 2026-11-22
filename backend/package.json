@@ -12,7 +12,8 @@
     "restart": "pm2 restart learninsight-api",
     "logs": "pm2 logs learninsight-api",
     "status": "pm2 status",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node scripts/build-vercel.js"
   },
   "keywords": [],
   "author": "",
@@ -36,7 +37,11 @@
     "pdf-parse": "^2.4.5"
   },
   "devDependencies": {
+    "esbuild": "^0.25.12",
     "nodemon": "^3.1.11",
     "pm2": "^6.0.14"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }

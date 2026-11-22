@@ -3,11 +3,18 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+require("dotenv").config();
 const config = require("./config");
+const connectDB = require("./config/database");
 const routes = require("./routes");
 const { errorHandler, notFound } = require("./middleware");
 
 const app = express();
+
+// Start the DB connection here so the app works both under server.js and as
+// a Vercel serverless entry (which imports this module and never calls listen).
+// Mongoose buffers queries until the connection is ready.
+connectDB();
 
 // Security middleware
 app.use(helmet());
