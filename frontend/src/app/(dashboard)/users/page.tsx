@@ -54,6 +54,7 @@ export default function UsersPage() {
   const [total, setTotal] = useState(0);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<AdminUser | null>(null);
+  const [roleCounts, setRoleCounts] = useState<Record<Role, number> | null>(null);
 
   useEffect(() => {
     if (!authLoading && me && me.role !== "admin") {
@@ -73,6 +74,7 @@ export default function UsersPage() {
       setUsers(res.data.users || []);
       setPages(res.data.pages || 1);
       setTotal(res.data.total || 0);
+      setRoleCounts(res.data.roleCounts || null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load users");
     } finally {
@@ -121,7 +123,8 @@ export default function UsersPage() {
     );
   }
 
-  const counts = {
+  // Prefer server totals (whole directory); fall back to the current page
+  const counts = roleCounts ?? {
     admin: users.filter((u) => u.role === "admin").length,
     teacher: users.filter((u) => u.role === "teacher").length,
     student: users.filter((u) => u.role === "student").length,

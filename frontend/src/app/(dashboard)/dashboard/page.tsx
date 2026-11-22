@@ -73,6 +73,8 @@ export default function DashboardPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [studentCount, setStudentCount] = useState(0);
+  const [attemptTotal, setAttemptTotal] = useState(0);
+  const [attemptStats, setAttemptStats] = useState<{ averageScore?: number } | null>(null);
 
   const role = user?.role;
   const isStudent = role === "student";
@@ -84,7 +86,8 @@ export default function DashboardPage() {
     const studentRole = role === "student";
     const teacherRole = role === "teacher" || role === "admin";
 
-    const attemptLimit = teacherRole ? 50 : 10;
+    // Students: last 60 attempts is enough for the trend chart and the streak.
+    const attemptLimit = teacherRole ? 200 : 60;
     const fetches: Promise<unknown>[] = [
       api.get("/progress").catch(() => ({ data: { data: [] } })),
       api.get(`/attempts?limit=${attemptLimit}`).catch(() => ({ data: { data: [] } })),
@@ -92,6 +95,7 @@ export default function DashboardPage() {
 
     if (studentRole) {
       fetches.push(api.get("/insights").catch(() => ({ data: { data: [] } })));
+      api.get("/attempts/stats").then((r) => setAttemptStats(r.data?.stats ?? null)).catch(() => {});
     }
     if (teacherRole) {
       fetches.push(api.get("/quizzes").catch(() => ({ data: { data: [] } })));
@@ -101,7 +105,9 @@ export default function DashboardPage() {
 
     Promise.all(fetches).then((results) => {
       const progressData = (results[0] as { data: { data: Progress[] } }).data?.data || [];
-      const attemptsData = (results[1] as { data: { data: QuizAttempt[] } }).data?.data || [];
+      const attemptsRes = (results[1] as { data: { data: QuizAttempt[]; total?: number } }).data;
+      const attemptsData = attemptsRes?.data || [];
+      setAttemptTotal(attemptsRes?.total ?? attemptsData.length);
       setProgress(progressData);
       setAttempts(attemptsData);
 
@@ -128,13 +134,27 @@ export default function DashboardPage() {
   }, [role]);
 
   const averageScore = useMemo(() => {
+    if (attemptStats?.averageScore != null && attemptTotal > 0) return `${Math.round(attemptStats.averageScore)}%`;
     if (attempts.length === 0) return "--";
     const avg = attempts.reduce((sum, a) => sum + a.percentage, 0) / attempts.length;
     return `${Math.round(avg)}%`;
   }, [attempts]);
 
+  // Consecutive days (ending today, or yesterday if nothing yet today) with at least one quiz
+  const studyStreak = useMemo(() => {
+    const days = new Set(attempts.map((a) => new Date(a.completedAt).toDateString()));
+    const d = new Date();
+    if (!days.has(d.toDateString())) d.setDate(d.getDate() - 1);
+    let streak = 0;
+    while (days.has(d.toDateString())) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    }
+    return streak;
+  }, [attempts]);
+
   const scoreTrendData = useMemo(() => {
-    return [...attempts].reverse().map((a) => {
+    return [...attempts].slice(0, 15).reverse().map((a) => {
       const quizName = typeof a.quiz === "object" ? a.quiz.title : "Quiz";
       return {
         name: quizName.length > 10 ? quizName.slice(0, 10) + "..." : quizName,
@@ -218,7 +238,7 @@ export default function DashboardPage() {
             />
             <StatsCard
               title="Quizzes Taken"
-              value={attempts.length}
+              value={attemptTotal}
               icon={<ClipboardIcon />}
               color="green"
               index={1}
@@ -232,7 +252,7 @@ export default function DashboardPage() {
             />
             <StatsCard
               title="Study Streak"
-              value="0 days"
+              value={`${studyStreak} ${studyStreak === 1 ? "day" : "days"}`}
               icon={<FireIcon />}
               color="purple"
               index={3}

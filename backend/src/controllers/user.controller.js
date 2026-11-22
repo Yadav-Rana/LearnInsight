@@ -36,16 +36,26 @@ const getUsers = asyncHandler(async (req, res, next) => {
     User.find(query)
       .select("-password")
       .populate("enrolledSubjects", "name")
+      .populate("teacher", "name email")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit)),
     User.countDocuments(query),
   ]);
 
+  // Role totals for the whole tenant view (ignores pagination and the role filter)
+  const countQuery = { ...query };
+  if (req.user.role !== "teacher") delete countQuery.role;
+  const roleCounts = { admin: 0, teacher: 0, student: 0 };
+  for (const r of await User.aggregate([{ $match: countQuery }, { $group: { _id: "$role", n: { $sum: 1 } } }])) {
+    roleCounts[r._id] = r.n;
+  }
+
   res.status(200).json({
     success: true,
     count: users.length,
     total,
+    roleCounts,
     page: parseInt(page),
     pages: Math.ceil(total / parseInt(limit)),
     users,

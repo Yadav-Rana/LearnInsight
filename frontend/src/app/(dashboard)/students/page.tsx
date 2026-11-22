@@ -56,7 +56,7 @@ export default function StudentsPage() {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await api.get("/users?role=student");
+      const response = await api.get("/users?role=student&limit=500");
       setStudents(response.data.data || response.data.users || []);
     } catch (err: unknown) {
       if (
