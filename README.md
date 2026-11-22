@@ -25,7 +25,7 @@ What the AI actually does:
 | AI | Google Gemini (`@google/genai`) — `gemini-2.5-flash` + `gemini-2.5-pro` |
 | External | YouTube Data API v3 |
 | Document extraction | `pdf-parse` (PDF), `mammoth` (DOCX), plain UTF-8 (TXT) |
-| File upload | `multer` (in-memory, 10 MB cap) |
+| File upload | `multer` (in-memory, 4 MB cap — Vercel body limit) |
 
 ## Project Structure
 
@@ -163,7 +163,7 @@ node src/scripts/migrateToTenancy.js   # Idempotent: flips legacy content to
 ## Feature Tour
 
 ### AI-driven syllabus → quiz pipeline
-- Teacher uploads a PDF / DOCX / TXT via the syllabus page (drag-drop or click; 10 MB limit).
+- Teacher uploads a PDF / DOCX / TXT via the syllabus page (drag-drop or click; 4 MB limit).
 - Server extracts text (`pdf-parse` / `mammoth` / UTF-8), normalises whitespace, caps to 200 k chars.
 - "Extract Topics" calls Gemini with a structured JSON schema and returns a topic + subtopic outline, shown in a left **SlidingPanel**.
 - "Generate Quiz" sends the extracted text to `gemini-2.5-flash` with a strict schema for 4-option MCQs plus an explanation, and saves an unpublished `Quiz` linked back to the syllabus.

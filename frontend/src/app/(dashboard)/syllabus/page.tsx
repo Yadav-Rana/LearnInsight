@@ -398,7 +398,7 @@ function TopicsPanel({
 }
 
 const ACCEPTED_EXTS = ".pdf,.docx,.txt,.md";
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024; // hosting (Vercel) caps request bodies at 4.5 MB
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -436,7 +436,7 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
       return;
     }
     if (f.size > MAX_UPLOAD_BYTES) {
-      setError(`File is too large (${formatBytes(f.size)}). Max 10 MB.`);
+      setError(`File is too large (${formatBytes(f.size)}). Max 4 MB.`);
       return;
     }
     const lower = f.name.toLowerCase();
@@ -641,7 +641,7 @@ function UploadModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
                       Drop a PDF, DOCX, or TXT here, or click to browse
                     </p>
                     <p className="text-xs" style={{ color: "var(--text-muted)", fontFamily: "var(--font-body)" }}>
-                      Max 10 MB. We will extract the text on the server.
+                      Max 4 MB. We will extract the text on the server.
                     </p>
                   </div>
                 )}

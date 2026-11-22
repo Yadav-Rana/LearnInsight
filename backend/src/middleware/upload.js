@@ -10,7 +10,8 @@ const ALLOWED_MIME_TYPES = new Set([
 
 const ALLOWED_EXTENSIONS = /\.(pdf|docx|txt|md)$/i;
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+// Vercel functions reject request bodies over 4.5 MB, so stay safely below that.
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
 
 const storage = multer.memoryStorage();
 
@@ -39,7 +40,7 @@ const singleDocument = (fieldName = "file") => (req, res, next) => {
     if (!err) return next();
     if (err instanceof multer.MulterError) {
       if (err.code === "LIMIT_FILE_SIZE") {
-        return next(new AppError("File is too large (max 10MB).", 413));
+        return next(new AppError("File is too large (max 4 MB).", 413));
       }
       return next(new AppError(err.message, 400));
     }
