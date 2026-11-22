@@ -1,0 +1,10 @@
+# Never upload local secrets, dependencies or personal files with `vercel deploy`
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.local.example
+**/node_modules
+**/.next
+backend/logs
+report + ppt
+demo-credentials.txt
