@@ -2,6 +2,15 @@ const config = require("../config");
 
 const SEARCH_URL = "https://www.googleapis.com/youtube/v3/search";
 
+const decodeEntities = (s = "") =>
+  s
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+
 async function searchVideos({ query, maxResults = 5 }) {
   const params = new URLSearchParams({
     part: "snippet",
@@ -24,9 +33,9 @@ async function searchVideos({ query, maxResults = 5 }) {
     const t = item.snippet.thumbnails;
     return {
       videoId: item.id.videoId,
-      title: item.snippet.title,
-      description: item.snippet.description,
-      channelTitle: item.snippet.channelTitle,
+      title: decodeEntities(item.snippet.title),
+      description: decodeEntities(item.snippet.description),
+      channelTitle: decodeEntities(item.snippet.channelTitle),
       publishedAt: item.snippet.publishedAt,
       thumbnail: (t.medium || t.high || t.default).url,
       url: `https://www.youtube.com/watch?v=${item.id.videoId}`,

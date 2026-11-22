@@ -89,20 +89,27 @@ const generateInsights = asyncHandler(async (req, res, next) => {
     subjectName: subjectNames[s.subject.toString()],
   }));
 
-  let aiSummary;
-  let recommendations;
-  try {
-    [aiSummary, recommendations] = await Promise.all([
-      geminiService.generateInsightSummary({
-        overallStats,
-        weakAreas: weakAreasForAI,
-        strengths: strengthsForAI,
-      }),
-      buildRecommendations(weakAreas, weakAreasForAI),
-    ]);
-  } catch (error) {
-    return next(new AppError("AI insight generation failed: " + error.message, 502));
+  // AI is best-effort: if Gemini is down or over quota, still return a useful
+  // rule-based insight instead of failing the whole request.
+  const [summaryResult, recsResult] = await Promise.allSettled([
+    geminiService.generateInsightSummary({
+      overallStats,
+      weakAreas: weakAreasForAI,
+      strengths: strengthsForAI,
+    }),
+    buildRecommendations(weakAreas, weakAreasForAI),
+  ]);
+  if (summaryResult.status === "rejected") {
+    console.warn("Insight summary fell back to rule-based text:", summaryResult.reason?.message);
   }
+  const aiSummary =
+    summaryResult.status === "fulfilled"
+      ? summaryResult.value
+      : buildFallbackSummary(overallStats, weakAreasForAI, strengthsForAI);
+  const recommendations =
+    recsResult.status === "fulfilled"
+      ? recsResult.value
+      : await buildRecommendations(weakAreas, []); // curated resources only, no AI
 
   // Create insight
   const insight = await Insight.create({
@@ -129,6 +136,19 @@ const generateInsights = asyncHandler(async (req, res, next) => {
 });
 
 // Helper functions for insight generation
+function buildFallbackSummary(overallStats, weakAreas, strengths) {
+  let text = `You are averaging ${overallStats.averageQuizScore}% across ${overallStats.totalSubjects} subjects with ${overallStats.averageCompletionRate}% average completion. `;
+  const strong = strengths.slice(0, 2).map((s) => s.subjectName);
+  const weak = weakAreas.slice(0, 2).map((w) => w.subjectName);
+  if (strong.length) text += `Your strongest areas are ${strong.join(" and ")}. `;
+  if (weak.length) {
+    text += `Focus next on ${weak.join(" and ")}: revisit the core material and review the explanations for questions you missed.`;
+  } else {
+    text += "No major weak spots right now — try harder quizzes to keep stretching yourself.";
+  }
+  return text;
+}
+
 function getWeaknessReason(progress) {
   const { quizStats, completionRate } = progress;
 

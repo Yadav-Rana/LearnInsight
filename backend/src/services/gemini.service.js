@@ -3,18 +3,49 @@ const config = require("../config");
 
 const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });
 
-const MODEL_FLASH = "gemini-2.5-flash";
-const MODEL_PRO = "gemini-2.5-pro";
+// Overridable via env so a model retirement doesn't require a code change.
+// "-latest" aliases track Google's current models (pinned names like gemini-2.5-pro
+// get retired for new keys). Pro has no free-tier quota, so the summary defaults to
+// flash; with billing enabled set GEMINI_MODEL_PRO=gemini-pro-latest.
+const MODEL_FLASH = process.env.GEMINI_MODEL_FLASH || "gemini-flash-latest";
+const MODEL_PRO = process.env.GEMINI_MODEL_PRO || MODEL_FLASH;
+
+// Last resort: separate per-model quota on the free tier, so it often still works
+// after flash hits its daily limit.
+const MODEL_LITE = process.env.GEMINI_MODEL_LITE || "gemini-flash-lite-latest";
+// Pinned older flash — its own quota bucket, so it's a useful middle fallback.
+const MODEL_FLASH_PINNED = "gemini-2.5-flash";
+
+const TIMEOUT_MS = Number(process.env.GEMINI_TIMEOUT_MS) || 20000;
+
+// Retired model (404), quota exhausted (429) or overloaded (503) → try the next model.
+const isRetryable = (err) =>
+  /NOT_FOUND|no longer available|is not found|not supported|RESOURCE_EXHAUSTED|quota|UNAVAILABLE|high demand|timed? ?out|abort|"code":(404|429|500|503)/i.test(
+    err?.message || ""
+  );
 
 async function callGemini({ model, prompt, responseSchema }) {
-  const response = await ai.models.generateContent({
-    model,
-    contents: prompt,
-    config: responseSchema
-      ? { responseMimeType: "application/json", responseSchema }
-      : undefined,
-  });
-  return response.text;
+  const chain = [...new Set([model, MODEL_FLASH, MODEL_FLASH_PINNED, MODEL_LITE])];
+  let lastErr;
+  for (const m of chain) {
+    try {
+      const response = await ai.models.generateContent({
+        model: m,
+        contents: prompt,
+        config: {
+          // Overloaded models can hang for a long time — give up and fall back quickly.
+          httpOptions: { timeout: TIMEOUT_MS },
+          ...(responseSchema ? { responseMimeType: "application/json", responseSchema } : {}),
+        },
+      });
+      return response.text;
+    } catch (err) {
+      lastErr = err;
+      if (!isRetryable(err)) throw err;
+      console.warn(`Gemini model "${m}" failed (${String(err.message).slice(0, 80)}…), trying next model`);
+    }
+  }
+  throw lastErr;
 }
 
 const quizSchema = {
